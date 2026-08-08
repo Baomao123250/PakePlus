@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>我的世界单机辅助控制面板【仅单机娱乐】</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4CAF50',
+                        secondary: '#8BC34A',
+                        danger: '#F44336',
+                        dark: '#121212',
+                        'dark-light': '#1E1E1E',
+                        purpleMain: '#9C27B0',
+                        gold: '#FFC107',
+                        warnRed:'#ff3333'
+                    },
+                    fontFamily: {
+                        minecraft: ['"Press Start 2P"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {content-visibility: auto;}
+            .text-shadow {text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);}
+            .glass {background: rgba(255,255,255,0.1);backdrop-filter: blur(10px);-webkit-backdrop-filter: blur(10px);border:1px solid rgba(255,255,255,0.2);}
+            .glass-dark {background: rgba(18,18,18,0.85);backdrop-filter: blur(12px);-webkit-backdrop-filter: blur(12px);border:1px solid rgba(255,255,255,0.12);}
+            .animate-float {animation: float 3s ease-in-out infinite;}
+            .animate-pulse-slow {animation: pulse 3s cubic-bezier(0.4,0,0.6,1) infinite;}
+            .rotate-180 {transform: rotate(180deg);}
+            .tooltip-glass{background:#222;border:1px solid #444;backdrop-filter:blur(6px);}
+        }
+        @keyframes float {0%{transform:translateY(0)}50%{transform:translateY(-12px)}100%{transform:translateY(0)}}
+        @keyframes slideIn {from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes slideOut {from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
+        @keyframes fadeIn {from{opacity:0}to{opacity:1}}
+        @keyframes fadeOut {from{opacity:1}to{opacity:0}}
+        @keyframes bounceIn {0%{transform:scale(0.3);opacity:0}50%{transform:scale(1.08)}70%{transform:scale(0.92)}100%{transform:scale(1);opacity:1}}
+        @keyframes progress {0%{width:0%}100%{width:100%}}
+        .animate-slide-in{animation:slideIn 0.3s ease-out forwards}
+        .animate-slide-out{animation:slideOut 0.3s ease-in forwards}
+        .animate-fade-in{animation:fadeIn 0.3s ease-out forwards}
+        .animate-fade-out{animation:fadeOut 0.3s ease-in forwards}
+        .animate-bounce-in{animation:bounceIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards}
+        .animate-progress{animation:progress 5s linear forwards}
+        /*滚动条*/
+        .custom-scrollbar::-webkit-scrollbar{width:6px}
+        .custom-scrollbar::-webkit-scrollbar-track{background:rgba(255,255,255,0.08);border-radius:3px}
+        .custom-scrollbar::-webkit-scrollbar-thumb{background:rgba(76,175,80,0.4);border-radius:3px}
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover{background:rgba(76,175,80,0.6)}
+        /*按钮通用*/
+        .draggable{cursor:move;user-select:none;transition:opacity 0.2s;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;}
+        .draggable:active{opacity:0.7}
+        .feature-btn{transition:all 0.2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+        .feature-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+        .feature-btn:active{transform:translateY(0) scale(0.98)}
+        .category-title{transition:all 0.2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+        .category-title:hover{background:rgba(255,255,255,0.05)}
+        .toast{animation:fadeIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards}
+        .search-input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);transition:all 0.2s;-webkit-appearance:none;border-radius:0.5rem;}
+        .search-input:focus{outline:none;border-color:rgba(76,175,80,0.5);background:rgba(255,255,255,0.08)}
+        /*弹窗动画*/
+        .modal-ani{animation:fadeIn 0.25s ease-out}
+        /*移动端优化*/
+        button, .feature-btn, .category-title, input, label {-webkit-tap-highlight-color:transparent;outline:none;}
+        input:focus{outline:2px solid rgba(76,175,80,0.5);}
+        /*防止移动端双击缩放*/
+        *{touch-action:manipulation;}
+    </style>
+</head>
+<body class="bg-gradient-to-br from-dark via-dark-light to-dark min-h-screen flex flex-col items-center justify-center text-white" style="overflow:auto;-webkit-overflow-scrolling:touch;min-height:100vh;min-height:100dvh;">
+    <!--背景粒子光晕-->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/15 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/15 rounded-full blur-3xl animate-pulse-slow" style="animation-delay:1s"></div>
+        <div class="absolute top-1/2 left-1/2 w-72 h-72 bg-purpleMain/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay:2s"></div>
+    </div>
+
+    <!--主界面-->
+    <div class="relative z-10 text-center px-4 w-full max-w-4xl">
+        <h1 class="text-[clamp(1.5rem,6vw,3.2rem)] font-minecraft font-bold mb-4 text-shadow animate-float leading-relaxed">
+            <i class="fa fa-cubes mr-3 text-primary"></i>MC单机辅助控制面板
+        </h1>
+        <p class="text-warnRed mb-6 text-sm md:text-base">⚠️警告：联机服务器使用作弊会封号，仅限单机本地测试</p>
+        <p class="text-slate-300 mb-8 text-sm md:text-base">多功能一键注入悬浮控制台 | 配置自动保存/导入导出</p>
+
+        <!--顶部功能工具栏-->
+        <div class="flex flex-wrap gap-2 justify-center mb-8">
+            <button id="openFloatingBtn" class="px-4 py-3 bg-primary hover:bg-primary/90 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-window-maximize mr-1"></i>开启悬浮窗
+            </button>
+            <button id="injectBtn" class="px-5 py-3 bg-purpleMain hover:bg-purple-700 rounded-lg font-bold relative overflow-hidden shadow-lg transition-all hover:-translate-y-0.5">
+                <div id="injectProgress" class="absolute bottom-0 left-0 h-1 bg-white/30 w-0 animate-progress hidden"></div>
+                <span id="injectText"><i class="fa fa-code mr-1"></i>一键注入</span>
+            </button>
+            <button id="closeFloatingBtn" class="px-4 py-3 bg-dark-light hover:bg-dark-light/90 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-window-close mr-1"></i>关闭悬浮
+            </button>
+            <button id="allOpen" class="px-4 py-3 bg-secondary hover:bg-green-600 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-check-square mr-1"></i>全功能开启
+            </button>
+            <button id="allClose" class="px-4 py-3 bg-danger hover:bg-red-600 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-square-o mr-1"></i>全功能关闭
+            </button>
+            <button id="resetCfg" class="px-4 py-3 bg-gold hover:bg-amber-500 text-black rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-refresh mr-1"></i>重置配置
+            </button>
+            <button id="exportCfg" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-download mr-1"></i>导出配置
+            </button>
+            <label class="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer">
+                <i class="fa fa-upload mr-1"></i>导入配置
+                <input id="importCfg" type="file" accept=".json" class="hidden">
+            </label>
+            <button id="helpBtn" class="px-4 py-3 bg-slate-600 hover:bg-slate-700 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-question-circle mr-1"></i>帮助
+            </button>
+            <button id="verifyBtn" class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5">
+                <i class="fa fa-key mr-1"></i>卡密验证
+            </button>
+        </div>
+
+        <!--快捷提示-->
+        <div class="text-slate-400 text-sm mb-2 hidden md:block">快捷键：Ctrl+O 开悬浮 | Ctrl+C 关悬浮 | Ctrl+I 一键注入</div>
+        <div class="text-slate-400 text-xs mb-2 md:hidden">点击按钮直接操作，悬浮窗可拖动</div>
+    </div>
+
+    <!--悬浮窗主控件-->
+    <div id="floatingWindow" class="fixed top-5 right-5 w-16 h-16 glass-dark rounded-full flex items-center justify-center shadow-xl z-50 draggable hidden animate-bounce-in group" style="touch-action:none;">
+        <i class="fa fa-cubes text-2xl"></i>
+        <!--悬浮窗迷你/锁定/透明度按钮-->
+        <div class="absolute -top-2 -right-2 hidden group-hover:flex gap-1 md:group-hover:flex max-md:group-active:flex">
+            <button id="floatLock" class="w-5 h-5 bg-slate-700 rounded text-xs"><i class="fa fa-lock"></i></button>
+            <button id="floatMini" class="w-5 h-5 bg-slate-700 rounded text-xs"><i class="fa fa-compress"></i></button>
+        </div>
+    </div>
+
+    <!--功能面板-->
+    <div id="featurePanel" class="fixed top-5 right-24 w-72 sm:w-80 glass-dark rounded-xl shadow-2xl z-40 hidden animate-slide-in overflow-hidden">
+        <div class="p-4 border-b border-white/10">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-lg flex items-center">
+                    <i class="fa fa-cogs mr-2 text-primary"></i>功能面板
+                </h3>
+                <div class="flex gap-2">
+                    <button id="foldAll" class="text-xs px-2 py-1 bg-slate-700 rounded">全部折叠</button>
+                    <button id="unfoldAll" class="text-xs px-2 py-1 bg-slate-700 rounded">全部展开</button>
+                </div>
+            </div>
+            <div class="relative">
+                <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input id="searchInput" type="text" placeholder="搜索功能名称..." class="search-input w-full pl-10 pr-4 py-2 rounded-lg text-sm">
+            </div>
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto custom-scrollbar" style="-webkit-overflow-scrolling:touch;">
+            <div class="p-3 space-y-2" id="featureList">
+                <!--战斗类-->
+                <div class="category">
+                    <div class="category-title w-full p-2 rounded-lg flex items-center justify-between text-sm font-semibold text-slate-300">
+                        <span><i class="fa fa-sword mr-2 text-danger"></i>战斗类</span>
+                        <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </div>
+                    <div class="category-content space-y-2 mt-1 pl-2">
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between relative" data-feature="killAura" data-tip="杀戮光环：自动近身秒杀生物/玩家，联机高危封号">
+                            <span><i class="fa fa-sword mr-2"></i>杀戮光环 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="bigSword" data-tip="百米大刀：近战攻击范围大幅扩大">
+                            <span><i class="fa fa-gavel mr-2"></i>百米大刀</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="criticalHit" data-tip="刀刀重击：每次攻击必暴击高额伤害">
+                            <span><i class="fa fa-hammer mr-2"></i>刀刀重击</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="attackEffect" data-tip="攻击特效：附加粒子、灼烧等攻击效果">
+                            <span><i class="fa fa-magic mr-2"></i>攻击特效</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="autoClick" data-tip="自动点击：自动连点攻击">
+                            <span><i class="fa fa-mouse-pointer mr-2"></i>自动点击</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="autoAim" data-tip="自动瞄准：远程自动锁定目标">
+                            <span><i class="fa fa-crosshairs mr-2"></i>自动瞄准</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="autoBreakBed" data-tip="自动破床：PVP自动破坏对手床铺">
+                            <span><i class="fa fa-bed mr-2"></i>自动破床</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--移动类-->
+                <div class="category">
+                    <div class="category-title w-full p-2 rounded-lg flex items-center justify-between text-sm font-semibold text-slate-300">
+                        <span><i class="fa fa-rocket mr-2 text-primary"></i>移动类</span>
+                        <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </div>
+                    <div class="category-content space-y-2 mt-1 pl-2">
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="rabbit" data-tip="兔子跳：连续高跳，移动速度暴涨">
+                            <span><i class="fa fa-paw mr-2"></i>兔子</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="wallHack" data-tip="穿墙：穿透方块自由穿行，高危作弊">
+                            <span><i class="fa fa-door-open mr-2"></i>穿墙 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="globalSpeed" data-tip="全局变速：修改游戏运行速率">
+                            <span><i class="fa fa-tachometer mr-2"></i>全局变速</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="safeWalk" data-tip="安全行走：高空不会失足坠落">
+                            <span><i class="fa fa-shield mr-2"></i>安全行走</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="fly" data-tip="飞行权限：生存模式自由飞行">
+                            <span><i class="fa fa-plane mr-2"></i>飞行权限</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="flyBypass" data-tip="飞行绕过：绕过服务器反飞行检测">
+                            <span><i class="fa fa-plane-departure mr-2"></i>飞行绕过 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="noFallDamage" data-tip="摔落无伤：坠落不掉生命值">
+                            <span><i class="fa fa-umbrella mr-2"></i>摔落无伤</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="levelFly" data-tip="平飞：低空平稳悬浮移动">
+                            <span><i class="fa fa-arrows-h mr-2"></i>平飞</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="rabbitJump" data-tip="兔子跳：持续弹跳加速">
+                            <span><i class="fa fa-arrow-up mr-2"></i>兔子跳</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="airWalk" data-tip="踏空：空气上直接行走">
+                            <span><i class="fa fa-cloud mr-2"></i>踏空</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--生存类-->
+                <div class="category">
+                    <div class="category-title w-full p-2 rounded-lg flex items-center justify-between text-sm font-semibold text-slate-300">
+                        <span><i class="fa fa-heart mr-2 text-secondary"></i>生存类</span>
+                        <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </div>
+                    <div class="category-content space-y-2 mt-1 pl-2">
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="revive" data-tip="原地复活：死亡原地立即复活">
+                            <span><i class="fa fa-heartbeat mr-2"></i>原地复活</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="noCobweb" data-tip="无视蜘蛛网：蛛网不减速">
+                            <span><i class="fa fa-ban mr-2"></i>无视蜘蛛网</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="autoGoldenApple" data-tip="自动金苹果：血量过低自动食用金苹果">
+                            <span><i class="fa fa-apple mr-2"></i>自动金苹果</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="summonMount" data-tip="召唤坐骑：瞬间召唤坐骑">
+                            <span><i class="fa fa-horse mr-2"></i>召唤坐骑</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="godMode" data-tip="上帝模式：无敌不死，所有伤害无效">
+                            <span><i class="fa fa-crown mr-2"></i>上帝模式 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="antiKick" data-tip="防踢：规避服务器踢出检测">
+                            <span><i class="fa fa-ban mr-2"></i>防踢 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--作弊类-->
+                <div class="category">
+                    <div class="category-title w-full p-2 rounded-lg flex items-center justify-between text-sm font-semibold text-slate-300">
+                        <span><i class="fa fa-exclamation-triangle mr-2 text-gold"></i>作弊类【联机极易封号】</span>
+                        <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </div>
+                    <div class="category-content space-y-2 mt-1 pl-2">
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="tp" data-tip="无权限TP：随意传送其他玩家">
+                            <span><i class="fa fa-rocket mr-2"></i>无权限TP <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="kill" data-tip="无权限KILL：远程秒杀任意玩家">
+                            <span><i class="fa fa-skull mr-2"></i>无权限KILL <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="manage" data-tip="成员强制管理：绕过权限修改服务器配置">
+                            <span><i class="fa fa-users mr-2"></i>成员强制管理 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="creative" data-tip="创造模式：生存切创造拿无限物品">
+                            <span><i class="fa fa-magic mr-2"></i>创造模式 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="firstRecharge" data-tip="首充：免费领取付费礼包">
+                            <span><i class="fa fa-gift mr-2"></i>首充</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="xray" data-tip="矿物透视：透视方块看见矿石宝箱">
+                            <span><i class="fa fa-eye mr-2"></i>矿物透视 <span class="text-warnRed text-xs">高危</span></span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="chestAura" data-tip="箱子光环：自动拾取范围内宝箱物品">
+                            <span><i class="fa fa-box mr-2"></i>箱子光环</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="chestTake" data-tip="箱子取物：隔空打开箱子拿物品">
+                            <span><i class="fa fa-box-open mr-2"></i>箱子取物</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="adventureTag" data-tip="冒险标签：无视冒险模式限制破坏方块">
+                            <span><i class="fa fa-tag mr-2"></i>冒险标签</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--实用类-->
+                <div class="category">
+                    <div class="category-title w-full p-2 rounded-lg flex items-center justify-between text-sm font-semibold text-slate-300">
+                        <span><i class="fa fa-wrench mr-2 text-blue-400"></i>实用类</span>
+                        <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </div>
+                    <div class="category-content space-y-2 mt-1 pl-2">
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="particleAura" data-tip="粒子光环：周身生成装饰粒子">
+                            <span><i class="fa fa-star mr-2"></i>粒子光环</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="playerTeleport" data-tip="玩家传送：标记坐标一键跳转">
+                            <span><i class="fa fa-arrows-alt mr-2"></i>玩家传送</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="remoteShop" data-tip="远程商店：随时随地打开商城">
+                            <span><i class="fa fa-store mr-2"></i>远程商店</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="motionCamera" data-tip="运动摄像：自由视角旁观画面">
+                            <span><i class="fa fa-video mr-2"></i>运动摄像</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="inventorySort" data-tip="背包整理：一键规整背包物品">
+                            <span><i class="fa fa-sort mr-2"></i>背包整理</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="lockBackpack" data-tip="锁背：背包物品无法被别人拾取">
+                            <span><i class="fa fa-lock mr-2"></i>锁背</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="potionEffect" data-tip="药水效果：永久全buff增益">
+                            <span><i class="fa fa-flask mr-2"></i>药水效果</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="clickBreak" data-tip="点击破坏：轻点方块直接击碎">
+                            <span><i class="fa fa-wrench mr-2"></i>点击破坏</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                        <button class="feature-btn w-full p-3 bg-danger/80 hover:bg-danger rounded-lg text-left font-medium flex items-center justify-between" data-feature="autoBridge" data-tip="自动搭路：脚下自动生成方块铺路">
+                            <span><i class="fa fa-road mr-2"></i>自动搭路</span>
+                            <i class="fa fa-toggle-off text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 border-t border-white/10 text-center text-xs text-slate-400">
+            点击悬浮窗开关面板｜点击分类折叠｜长按功能查看说明
+        </div>
+    </div>
+
+    <!--提示框容器-->
+    <div id="toastContainer" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2"></div>
+    <!--帮助弹窗-->
+    <div id="helpModal" class="fixed inset-0 bg-black/70 z-[9999] hidden flex items-center justify-center p-4 modal-ani">
+        <div class="glass-dark p-5 rounded-xl max-w-lg w-full max-h-[80vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold"><i class="fa fa-book text-primary mr-2"></i>使用须知&帮助</h2>
+                <button id="closeHelp" class="text-xl hover:text-danger"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-200">
+                <p class="text-warnRed font-bold">⚠️重要声明：所有作弊功能仅限单机存档测试，任何正版联机、服务器使用均违反用户协议，会永久封禁账号！</p>
+                <p>1.注入：点击一键注入，等待5秒完成，注入成功自动开启悬浮窗，可重复重新注入。</p>
+                <p>2.悬浮窗：拖动换位，点击锁定/迷你尺寸按钮。</p>
+                <p>3.批量控制：全启/全关一键切换所有功能，重置配置清空本地存档恢复默认全关。</p>
+                <p>4.配置：导出生成JSON存档，导入可读取之前保存的开关配置。</p>
+                <p>5.搜索：输入关键词快速筛选对应功能。</p>
+                <p>6.高危标注：红色【高危】功能反作弊检测最灵敏，严禁联机启用。</p>
+            </div>
+        </div>
+    </div>
+    <!--悬浮提示tooltip-->
+    <div id="tipBox" class="fixed hidden tooltip-glass px-3 py-2 rounded-lg z-[9999] max-w-[220px] text-sm"></div>
+
+    <!--卡密验证弹窗-->
+    <div id="verifyModal" class="fixed inset-0 bg-black/70 z-[9999] hidden flex items-center justify-center p-4 modal-ani">
+        <div class="glass-dark p-6 rounded-xl max-w-md w-full">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-bold"><i class="fa fa-shield text-emerald-400 mr-2"></i>卡密验证</h2>
+                <button id="closeVerify" class="text-xl hover:text-danger"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-sm text-slate-300">请输入您的卡密以解锁全部功能：</p>
+                <input id="verifyInput" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="请输入卡密" class="search-input w-full px-4 py-3 rounded-lg text-base tracking-widest text-center font-mono">
+                <button id="verifySubmit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-bold text-lg shadow-lg transition-all hover:-translate-y-0.5">
+                    <i class="fa fa-check mr-1"></i>验证并解锁
+                </button>
+                <div id="verifyMsg" class="text-center text-sm hidden"></div>
+                <div class="border-t border-white/10 pt-3 text-xs text-slate-400 space-y-1">
+                    <p><i class="fa fa-info-circle mr-1"></i>卡密说明：</p>
+                    <p>永久卡密 → 永久解锁所有功能</p>
+                    <p>年卡卡密 → 解锁一年有效期</p>
+                    <p>月卡卡密 → 解锁一个月有效期</p>
+                    <p>日卡卡密 → 解锁一天有效期</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--卡密状态提示条-->
+    <div id="licenseBar" class="fixed bottom-2 left-1/2 -translate-x-1/2 z-40 hidden">
+        <div class="glass-dark px-4 py-1.5 rounded-full text-xs flex items-center gap-2">
+            <i class="fa fa-check-circle text-secondary"></i>
+            <span id="licenseText"></span>
+            <button id="licenseLogout" class="text-danger hover:text-red-400 ml-1"><i class="fa fa-sign-out"></i></button>
+        </div>
+    </div>
+
+    <script>
+        //DOM缓存
+        const $ = s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+        const openFloatingBtn = $('#openFloatingBtn'),closeFloatingBtn=$('#closeFloatingBtn'),injectBtn=$('#injectBtn');
+        const injectProgress=$('#injectProgress'),injectText=$('#injectText'),floatingWindow=$('#floatingWindow');
+        const featurePanel=$('#featurePanel'),toastContainer=$('#toastContainer'),searchInput=$('#searchInput');
+        const categoryTitles=$$('.category-title'),featureBtns=$$('.feature-btn');
+        const allOpen=$('#allOpen'),allClose=$('#allClose'),resetCfg=$('#resetCfg');
+        const exportCfg=$('#exportCfg'),importCfg=$('#importCfg'),helpBtn=$('#helpBtn'),closeHelp=$('#closeHelp'),helpModal=$('#helpModal');
+        const foldAll=$('#foldAll'),unfoldAll=$('#unfoldAll'),tipBox=$('#tipBox');
+        const floatLock=$('#floatLock'),floatMini=$('#floatMini');
+        const verifyBtn=$('#verifyBtn'),verifyModal=$('#verifyModal'),closeVerify=$('#closeVerify');
+        const verifyInput=$('#verifyInput'),verifySubmit=$('#verifySubmit'),verifyMsg=$('#verifyMsg');
+        const licenseBar=$('#licenseBar'),licenseText=$('#licenseText'),licenseLogout=$('#licenseLogout');
+
+        //全局状态
+        let isFloatingOpen=false,isPanelOpen=false,isInjected=JSON.parse(localStorage.getItem('injectState'))||false;
+        let floatIsLocked=false,floatIsMini=false;
+
+        //卡密验证状态
+        const CARD_KEYS={
+            '12':'permanent',
+            '56':'year',
+            '34':'month',
+            '89':'day'
+        };
+        const CARD_LABELS={'permanent':'永久','year':'一年','month':'一个月','day':'一天'};
+        let licenseInfo=JSON.parse(localStorage.getItem('mcLicense'))||null;
+        const defaultStates={
+            tp:false,kill:false,manage:false,creative:false,killAura:false,rabbit:false,bigSword:false,revive:false,wallHack:false,globalSpeed:false,safeWalk:false,
+            fly:false,firstRecharge:false,particleAura:false,noCobweb:false,flyBypass:false,criticalHit:false,attackEffect:false,chestAura:false,noFallDamage:false,
+            summonMount:false,playerTeleport:false,remoteShop:false,chestTake:false,godMode:false,adventureTag:false,motionCamera:false,antiKick:false,
+            inventorySort:false,lockBackpack:false,levelFly:false,rabbitJump:false,potionEffect:false,autoClick:false,airWalk:false,autoGoldenApple:false,
+            clickBreak:false,autoBridge:false,autoAim:false,autoBreakBed:false,xray:false
+        };
+        let featureStates=JSON.parse(localStorage.getItem('mcHelperStates'))||defaultStates;
+        const featureTip={
+            tp:'无权限TP：随意传送其他玩家，联机高危封号',kill:'无权限KILL：远程秒杀玩家',manage:'成员强制管理：越权修改服务器',creative:'创造模式：生存切换创造拿物品',
+            killAura:'杀戮光环：自动秒杀周边生物玩家',rabbit:'兔子：超高跳跃加速',bigSword:'百米大刀：超大近战攻击范围',revive:'原地复活：死亡原地复活',
+            wallHack:'穿墙：穿透方块，高危作弊',globalSpeed:'全局变速：修改游戏运行速度',safeWalk:'安全行走：不会踩空坠落',fly:'飞行权限：生存自由飞行',
+            firstRecharge:'首充：免费领取付费礼包',particleAura:'粒子光环：周身装饰粒子',noCobweb:'无视蜘蛛网：蛛网不减速',flyBypass:'飞行绕过：绕过反飞行检测',
+            criticalHit:'刀刀重击：次次暴击高伤',attackEffect:'攻击特效：附加灼烧粒子',chestAura:'箱子光环：自动拾取宝箱',noFallDamage:'摔落无伤：坠落不掉血',
+            summonMount:'召唤坐骑：一键召坐骑',playerTeleport:'玩家传送：坐标瞬移',remoteShop:'远程商店：随时随地开商城',chestTake:'箱子取物：隔空开箱子',
+            godMode:'上帝模式：无敌免伤高危',adventureTag:'冒险标签：无视冒险破坏限制',motionCamera:'运动摄像：自由旁观视角',antiKick:'防踢：规避服务器踢出',
+            inventorySort:'背包整理：一键整理背包',lockBackpack:'锁背：物品无法被拾取',levelFly:'平飞：低空悬浮移动',rabbitJump:'兔子跳：连续弹跳加速',
+            potionEffect:'药水效果：永久全buff',autoClick:'自动点击：连点攻击',airWalk:'踏空：空气行走',autoGoldenApple:'自动金苹果：残血自动吃苹果',
+            clickBreak:'点击破坏：轻点碎方块',autoBridge:'自动搭路：脚下自动铺方块',autoAim:'自动瞄准：远程自瞄',autoBreakBed:'自动破床：PVP拆床',xray:'矿物透视：透视看矿石宝箱'
+        };
+
+        //===== 工具函数 =====
+        function getName(k){
+            const map={
+                tp:'无权限TP',kill:'无权限KILL',manage:'成员强制管理',creative:'创造模式',killAura:'杀戮光环',rabbit:'兔子',bigSword:'百米大刀',revive:'原地复活',
+                wallHack:'穿墙',globalSpeed:'全局变速',safeWalk:'安全行走',fly:'飞行权限',firstRecharge:'首充',particleAura:'粒子光环',noCobweb:'无视蜘蛛网',
+                flyBypass:'飞行绕过',criticalHit:'刀刀重击',attackEffect:'攻击特效',chestAura:'箱子光环',noFallDamage:'摔落无伤',summonMount:'召唤坐骑',
+                playerTeleport:'玩家传送',remoteShop:'远程商店',chestTake:'箱子取物',godMode:'上帝模式',adventureTag:'冒险标签',motionCamera:'运动摄像',
+                antiKick:'防踢',inventorySort:'背包整理',lockBackpack:'锁背',levelFly:'平飞',rabbitJump:'兔子跳',potionEffect:'药水效果',autoClick:'自动点击',
+                airWalk:'踏空',autoGoldenApple:'自动金苹果',clickBreak:'点击破坏',autoBridge:'自动搭路',autoAim:'自动瞄准',autoBreakBed:'自动破床',xray:'矿物透视'
+            };
+            return map[k]||k;
+        }
+        function saveCfg(){localStorage.setItem('mcHelperStates',JSON.stringify(featureStates));}
+
+        function showToast(msg,type='info'){
+            const div=document.createElement('div');div.className='toast px-4 py-2 rounded-lg shadow-lg flex items-center gap-2';
+            let icon='',cls='';
+            switch(type){
+                case'success':cls='bg-secondary';icon='<i class="fa fa-check-circle"></i>';break;
+                case'error':cls='bg-danger';icon='<i class="fa fa-times-circle"></i>';break;
+                case'purple':cls='bg-purpleMain';icon='<i class="fa fa-star"></i>';break;
+                case'gold':cls='bg-gold text-black';icon='<i class="fa fa-info-circle"></i>';break;
+                default:cls='bg-dark-light';icon='<i class="fa fa-info-circle"></i>';
+            }
+            div.classList.add(cls);div.innerHTML=`${icon}${msg}`;toastContainer.appendChild(div);
+            setTimeout(()=>div.remove(),3000);
+        }
+
+        //===== 卡密验证相关函数 =====
+        function isLicensed(){
+            if(!licenseInfo) return false;
+            if(licenseInfo.type==='permanent') return true;
+            if(licenseInfo.expire && Date.now()<licenseInfo.expire) return true;
+            licenseInfo=null;localStorage.removeItem('mcLicense');updateLicenseBar();
+            return false;
+        }
+        function getExpireText(){
+            if(!licenseInfo) return '';
+            if(licenseInfo.type==='permanent') return '永久授权';
+            if(!licenseInfo.expire) return '';
+            const diff=licenseInfo.expire-Date.now();
+            if(diff<=0) return '已过期';
+            const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000);
+            if(d>0) return `剩余 ${d}天${h}小时`;
+            if(h>0) return `剩余 ${h}小时${m}分`;
+            return `剩余 ${m}分钟`;
+        }
+        function updateLicenseBar(){
+            if(isLicensed()){
+                licenseBar.classList.remove('hidden');
+                licenseText.textContent=`已授权（${CARD_LABELS[licenseInfo.type]||''}）${getExpireText()?' · '+getExpireText():''}`;
+            }else{
+                licenseBar.classList.add('hidden');
+                verifyBtn.classList.remove('bg-emerald-600','hover:bg-emerald-700');
+                verifyBtn.classList.add('bg-amber-600','hover:bg-amber-700');
+                verifyBtn.innerHTML='<i class="fa fa-exclamation-triangle mr-1"></i>未验证';
+            }
+        }
+        function initVerifyBtn(){
+            if(isLicensed()){
+                verifyBtn.classList.remove('bg-amber-600','hover:bg-amber-700');
+                verifyBtn.classList.add('bg-secondary','hover:bg-green-600');
+                verifyBtn.innerHTML='<i class="fa fa-check mr-1"></i>已验证';
+            }else{
+                verifyBtn.classList.remove('bg-secondary','hover:bg-green-600');
+                verifyBtn.classList.add('bg-amber-600','hover:bg-amber-700');
+                verifyBtn.innerHTML='<i class="fa fa-exclamation-triangle mr-1"></i>未验证';
+            }
+        }
+        function doVerify(key){
+            const t=CARD_KEYS[key];
+            if(!t){return false;}
+            const info={type:t};
+            if(t==='permanent'){info.expire=null;}
+            else if(t==='year'){info.expire=Date.now()+365*86400000;}
+            else if(t==='month'){info.expire=Date.now()+30*86400000;}
+            else if(t==='day'){info.expire=Date.now()+86400000;}
+            licenseInfo=info;localStorage.setItem('mcLicense',JSON.stringify(info));
+            return true;
+        }
+
+        //渲染所有功能按钮状态
+        function renderAllBtn(){featureBtns.forEach(btn=>{
+            const k=btn.dataset.feature,icon=btn.querySelector('i:last-child');
+            if(featureStates[k]){btn.classList.remove('bg-danger/80','hover:bg-danger');btn.classList.add('bg-secondary/80','hover:bg-secondary');icon.classList.replace('fa-toggle-off','fa-toggle-on');}
+            else{btn.classList.remove('bg-secondary/80','hover:bg-secondary');btn.classList.add('bg-danger/80','hover:bg-danger');icon.classList.replace('fa-toggle-on','fa-toggle-off');}
+        });}
+
+        //面板定位
+        function updatePanelPosition(){
+            const fw=floatingWindow.getBoundingClientRect(),fp=featurePanel.getBoundingClientRect();
+            let l=fw.right+10,t=fw.top;
+            if(l+fp.width>innerWidth)l=fw.left-fp.width-10;
+            if(t+fp.height>innerHeight)t=innerHeight-fp.height-10;
+            l=Math.max(10,l);t=Math.max(10,t);
+            featurePanel.style.left=l+'px';featurePanel.style.top=t+'px';featurePanel.style.right='auto';
+        }
+
+        //===== 事件绑定辅助：同时支持 click 和 touchstart =====
+        function bindClick(el, handler, options={preventTouchDefault:false}){
+            if(!el) return;
+            // 防重复绑定：用标记
+            if(el._bound) return;
+            el._bound = true;
+            el.addEventListener('click', handler, {passive:true});
+            // 移动端额外绑定 touchstart，延迟判定是否为点击
+            el.addEventListener('touchstart', function(e){
+                this._touchStartX = e.touches[0].clientX;
+                this._touchStartY = e.touches[0].clientY;
+                this._touchMoved = false;
+            }, {passive:true});
+            el.addEventListener('touchmove', function(e){
+                const dx = Math.abs(e.touches[0].clientX - this._touchStartX);
+                const dy = Math.abs(e.touches[0].clientY - this._touchStartY);
+                if(dx > 8 || dy > 8) this._touchMoved = true;
+            }, {passive:true});
+            el.addEventListener('touchend', function(e){
+                if(!this._touchMoved){
+                    if(options.preventTouchDefault !== false) e.preventDefault();
+                    handler.call(this, e);
+                }
+                this._touchMoved = false;
+            }, {passive:false});
+        }
+
+        //===== 注入逻辑 =====
+        function handleInject(){
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后再注入','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+            if(isInjected){showToast('已完成注入，如需刷新可重新注入','info');}
+            injectBtn.disabled=true;injectText.innerHTML=`<i class="fa fa-spinner fa-spin mr-2"></i>注入中`;
+            injectProgress.classList.remove('hidden');showToast('正在执行注入流程...','purple');
+            setTimeout(()=>{
+                injectBtn.disabled=false;injectText.innerHTML=`<i class="fa fa-refresh mr-2"></i>重新注入`;
+                injectProgress.classList.add('hidden');isInjected=true;localStorage.setItem('injectState',JSON.stringify(true));
+                showToast('注入成功，悬浮窗已自动启用','success');
+                if(!isFloatingOpen){floatingWindow.classList.remove('hidden');floatingWindow.classList.add('animate-bounce-in');isFloatingOpen=true;}
+            },5000);
+        }
+        bindClick(injectBtn, handleInject);
+
+        //===== 悬浮窗开关 =====
+        function handleOpenFloat(){
+            if(!isFloatingOpen){floatingWindow.classList.remove('hidden');floatingWindow.classList.add('animate-bounce-in');isFloatingOpen=true;showToast('悬浮窗开启成功','success');}
+            else showToast('悬浮窗已处于开启状态','info');
+        }
+        bindClick(openFloatingBtn, handleOpenFloat);
+
+        function handleCloseFloat(){
+            if(isFloatingOpen){
+                floatingWindow.classList.add('animate-fade-out');featurePanel.classList.add('animate-fade-out');
+                setTimeout(()=>{
+                    floatingWindow.classList.add('hidden');floatingWindow.classList.remove('animate-fade-out');
+                    featurePanel.classList.add('hidden');featurePanel.classList.remove('animate-fade-out','animate-slide-in');
+                    isFloatingOpen=false;isPanelOpen=false;
+                },300);
+                showToast('悬浮窗已关闭','info');
+            }else showToast('悬浮窗尚未开启','info');
+        }
+        bindClick(closeFloatingBtn, handleCloseFloat);
+
+        //悬浮窗点击切换面板
+        function handleFloatClick(e){
+            if(floatIsLocked) return;
+            if(isPanelOpen){featurePanel.classList.add('animate-slide-out');setTimeout(()=>{featurePanel.classList.add('hidden');featurePanel.classList.remove('animate-slide-out');isPanelOpen=false;},300);}
+            else{featurePanel.classList.remove('hidden');featurePanel.classList.add('animate-slide-in');isPanelOpen=true;updatePanelPosition();}
+        }
+        bindClick(floatingWindow, handleFloatClick);
+
+        //===== 悬浮窗锁定/迷你 =====
+        bindClick(floatLock, function(e){
+            floatIsLocked=!floatIsLocked;
+            floatLock.innerHTML=floatIsLocked?'<i class="fa fa-unlock"></i>':'<i class="fa fa-lock"></i>';
+            showToast(floatIsLocked?'悬浮窗已锁定无法点开面板':'解除锁定','info');
+        });
+        bindClick(floatMini, function(e){
+            floatIsMini=!floatIsMini;
+            if(floatIsMini){floatingWindow.style.width='40px';floatingWindow.style.height='40px';floatingWindow.innerHTML='<i class="fa fa-cubes text-sm"></i>';}
+            else{floatingWindow.style.width='64px';floatingWindow.style.height='64px';floatingWindow.innerHTML='<i class="fa fa-cubes text-2xl"></i>';}
+            showToast(floatIsMini?'切换迷你尺寸':'恢复原尺寸','info');
+        });
+
+        //===== 分类折叠展开 =====
+        categoryTitles.forEach(title=>{
+            bindClick(title, function(){
+                const con=title.nextElementSibling,arrow=title.querySelector('.fa-chevron-down');
+                con.classList.toggle('hidden');arrow.classList.toggle('rotate-180');
+            });
+        });
+        bindClick(foldAll, ()=>{categoryTitles.forEach(t=>{const c=t.nextElementSibling,a=t.querySelector('.fa-chevron-down');c.classList.add('hidden');a.classList.add('rotate-180');});showToast('全部分类折叠','info');});
+        bindClick(unfoldAll, ()=>{categoryTitles.forEach(t=>{const c=t.nextElementSibling,a=t.querySelector('.fa-chevron-down');c.classList.remove('hidden');a.classList.remove('rotate-180');});showToast('全部分类展开','info');});
+
+        //===== 搜索 =====
+        searchInput.addEventListener('input',(e)=>{
+            const kw=e.target.value.toLowerCase().trim();
+            $$('.category').forEach(cat=>{
+                const con=cat.querySelector('.category-content'),btns=con.querySelectorAll('.feature-btn');
+                let hasMatch=false;
+                btns.forEach(b=>{const txt=b.textContent.toLowerCase();txt.includes(kw)?(b.classList.remove('hidden'),hasMatch=true):b.classList.add('hidden');});
+                if(!kw){cat.classList.remove('hidden');con.classList.remove('hidden');cat.querySelector('.fa-chevron-down').classList.remove('rotate-180');}
+                else cat.classList.toggle('hidden',!hasMatch),con.classList.toggle('hidden',!hasMatch);
+            });
+        });
+
+        //===== 功能按钮 =====
+        // tooltip 长按显示（移动端友好）
+        let tipTimer=null;
+        featureBtns.forEach(btn=>{
+            const tipTxt=btn.dataset.tip;
+            // 桌面端 hover
+            btn.addEventListener('mouseenter',()=>{
+                tipBox.textContent=tipTxt;tipBox.classList.remove('hidden');
+                const rect=btn.getBoundingClientRect();
+                tipBox.style.left=(rect.x+10)+'px';tipBox.style.top=(rect.y-36)+'px';
+            });
+            btn.addEventListener('mouseleave',()=>tipBox.classList.add('hidden'));
+
+            // 移动端长按显示 tip
+            btn.addEventListener('touchstart',()=>{
+                tipTimer=setTimeout(()=>{
+                    tipBox.textContent=tipTxt;tipBox.classList.remove('hidden');
+                    const rect=btn.getBoundingClientRect();
+                    tipBox.style.left=(rect.x+10)+'px';tipBox.style.top=(rect.y-36)+'px';
+                },500);
+            },{passive:true});
+            btn.addEventListener('touchend',()=>{
+                clearTimeout(tipTimer);
+                setTimeout(()=>tipBox.classList.add('hidden'),1500);
+            },{passive:true});
+            btn.addEventListener('touchmove',()=>clearTimeout(tipTimer),{passive:true});
+
+            // 点击切换
+            bindClick(btn, function(){
+                if(!isLicensed()){showToast('⚠️ 请先验证卡密后使用功能','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+                const key=btn.dataset.feature,icon=btn.querySelector('i:last-child');
+                featureStates[key]=!featureStates[key];localStorage.setItem('mcHelperStates',JSON.stringify(featureStates));
+                if(featureStates[key]){
+                    btn.classList.remove('bg-danger/80','hover:bg-danger');btn.classList.add('bg-secondary/80','hover:bg-secondary');
+                    icon.classList.replace('fa-toggle-off','fa-toggle-on');showToast(`${getName(key)} 已开启`,'success');
+                }else{
+                    btn.classList.remove('bg-secondary/80','hover:bg-secondary');btn.classList.add('bg-danger/80','hover:bg-danger');
+                    icon.classList.replace('fa-toggle-on','fa-toggle-off');showToast(`${getName(key)} 已关闭`,'info');
+                }
+            });
+        });
+
+        //===== 批量开关 =====
+        bindClick(allOpen, ()=>{
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后使用功能','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+            Object.keys(featureStates).forEach(k=>featureStates[k]=true);saveCfg();renderAllBtn();showToast('全部功能一键开启','success');
+        });
+        bindClick(allClose, ()=>{
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后使用功能','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+            Object.keys(featureStates).forEach(k=>featureStates[k]=false);saveCfg();renderAllBtn();showToast('全部功能一键关闭','danger');
+        });
+        bindClick(resetCfg, ()=>{
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后再重置配置','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+            if(confirm('确定重置所有配置为默认关闭？本地存储将清空')){
+                featureStates=JSON.parse(JSON.stringify(defaultStates));
+                localStorage.setItem('mcHelperStates',JSON.stringify(featureStates));
+                localStorage.setItem('injectState','false');isInjected=false;injectText.innerHTML=`<i class="fa fa-code mr-2"></i>一键注入`;
+                renderAllBtn();showToast('配置已全部重置','gold');
+            }
+        });
+
+        //===== 导入导出 =====
+        bindClick(exportCfg, ()=>{
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后再导出配置','error');verifyModal.classList.remove('hidden');verifyInput.focus();return;}
+            const jsonStr=JSON.stringify(featureStates,null,2);
+            const blob=new Blob([jsonStr],{type:'application/json'});
+            const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MC辅助配置.json';a.click();
+            showToast('配置文件已下载','success');
+        });
+        importCfg.addEventListener('change',(e)=>{
+            if(!isLicensed()){showToast('⚠️ 请先验证卡密后再导入配置','error');verifyModal.classList.remove('hidden');verifyInput.focus();importCfg.value='';return;}
+            const file=e.target.files[0];if(!file)return;
+            const fr=new FileReader();fr.onload=ev=>{
+                try{
+                    const parseData=JSON.parse(ev.target.result);featureStates={...defaultStates,...parseData};
+                    saveCfg();renderAllBtn();showToast('配置导入成功','success');
+                }catch{showToast('配置文件格式错误','error');}
+            };fr.readAsText(file);
+            importCfg.value='';
+        });
+
+        //===== 帮助弹窗 =====
+        bindClick(helpBtn, ()=>helpModal.classList.remove('hidden'));
+        bindClick(closeHelp, ()=>helpModal.classList.add('hidden'));
+        helpModal.addEventListener('click',(e)=>{if(e.target===helpModal)helpModal.classList.add('hidden');});
+
+        //===== 卡密验证弹窗 =====
+        bindClick(verifyBtn, ()=>{
+            if(isLicensed()){showToast('您已通过验证，无需重复操作','info');return;}
+            verifyModal.classList.remove('hidden');verifyInput.value='';verifyMsg.classList.add('hidden');verifyInput.focus();
+        });
+        bindClick(closeVerify, ()=>verifyModal.classList.add('hidden'));
+        verifyModal.addEventListener('click',(e)=>{if(e.target===verifyModal)verifyModal.classList.add('hidden');});
+
+        // 回车提交
+        verifyInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')verifySubmit.click();});
+
+        bindClick(verifySubmit, ()=>{
+            const val=verifyInput.value.trim();
+            if(!val){verifyMsg.textContent='请输入卡密';verifyMsg.className='text-center text-sm text-warnRed';verifyMsg.classList.remove('hidden');return;}
+            const ok=doVerify(val);
+            if(ok){
+                const label=CARD_LABELS[licenseInfo.type]||'';
+                verifyMsg.textContent=`✅ 验证成功！${label}授权已激活`;verifyMsg.className='text-center text-sm text-secondary';verifyMsg.classList.remove('hidden');
+                showToast(`卡密验证成功（${label}）`,'success');
+                initVerifyBtn();updateLicenseBar();
+                setTimeout(()=>{verifyModal.classList.add('hidden');},1500);
+            }else{
+                verifyMsg.textContent='❌ 卡密错误，请检查后重试';verifyMsg.className='text-center text-sm text-warnRed';verifyMsg.classList.remove('hidden');
+                showToast('卡密验证失败','error');
+            }
+        });
+
+        //===== 退出授权 =====
+        bindClick(licenseLogout, ()=>{
+            if(confirm('确定要退出当前授权吗？退出后功能将被锁定。')){
+                licenseInfo=null;localStorage.removeItem('mcLicense');
+                initVerifyBtn();updateLicenseBar();
+                Object.keys(featureStates).forEach(k=>featureStates[k]=false);saveCfg();renderAllBtn();
+                showToast('已退出授权，功能已锁定','info');
+            }
+        });
+
+        //===== 悬浮窗拖拽（同时支持鼠标和触摸） =====
+        let drag=false,ox,oy;
+        function startDrag(e){
+            if(floatIsLocked) return;
+            drag=true;
+            const t=e.touches?e.touches[0]:e;
+            ox=t.clientX-floatingWindow.getBoundingClientRect().left;
+            oy=t.clientY-floatingWindow.getBoundingClientRect().top;
+            floatingWindow.style.cursor='grabbing';
+        }
+        function moveDrag(e){
+            if(!drag) return;
+            e.preventDefault();
+            const t=e.touches?e.touches[0]:e;
+            let x=t.clientX-ox,y=t.clientY-oy;
+            const maxX=innerWidth-floatingWindow.offsetWidth,maxY=innerHeight-floatingWindow.offsetHeight;
+            floatingWindow.style.left=Math.max(0,Math.min(x,maxX))+'px';floatingWindow.style.top=Math.max(0,Math.min(y,maxY))+'px';floatingWindow.style.right='auto';
+            if(isPanelOpen)updatePanelPosition();
+        }
+        function endDrag(){drag=false;floatingWindow.style.cursor='move';}
+
+        floatingWindow.addEventListener('mousedown',startDrag);
+        document.addEventListener('mousemove',moveDrag);
+        document.addEventListener('mouseup',endDrag);
+        floatingWindow.addEventListener('touchstart',startDrag,{passive:false});
+        document.addEventListener('touchmove',moveDrag,{passive:false});
+        document.addEventListener('touchend',endDrag);
+
+        //===== 窗口事件 =====
+        window.addEventListener('resize',()=>{if(isPanelOpen)updatePanelPosition();});
+        window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(isPanelOpen)updatePanelPosition();},300);});
+
+        //===== 初始化 =====
+        window.addEventListener('DOMContentLoaded',()=>{
+            renderAllBtn();
+            initVerifyBtn();
+            updateLicenseBar();
+            if(isInjected){injectText.innerHTML=`<i class="fa fa-refresh mr-2"></i>重新注入`;}
+            //如果已过期，提示
+            if(licenseInfo && licenseInfo.type!=='permanent' && licenseInfo.expire && Date.now()>=licenseInfo.expire){
+                showToast('⚠️ 授权已过期，请重新验证卡密','error');
+                licenseInfo=null;localStorage.removeItem('mcLicense');
+                initVerifyBtn();updateLicenseBar();
+            }
+        });
+
+        //===== 阻止弹窗内部滚动穿透到body =====
+        verifyModal.addEventListener('touchmove',(e)=>{if(e.target===verifyModal)e.preventDefault();},{passive:false});
+        helpModal.addEventListener('touchmove',(e)=>{if(e.target===helpModal)e.preventDefault();},{passive:false});
+    </script>
+</body>
+</html>
