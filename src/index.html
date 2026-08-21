@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#090a0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<title>失控进化</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#090a0b;color:#eef1f4;-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior:none;padding:max(0px,env(safe-area-inset-top)) max(0px,env(safe-area-inset-right)) max(0px,env(safe-area-inset-bottom)) max(0px,env(safe-area-inset-left))}
+button,input,select{font:inherit}
+button{border:0}
+.no-select,.ayimgui,.login-card,.launcher{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+.ayimgui{position:fixed;width:420px;height:430px;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;background:#101214;border:1px solid #292d31;border-radius:8px;overflow:hidden;box-shadow:0 12px 38px rgba(0,0,0,.55);touch-action:none}
+.aytitle{height:28px;background:#090a0b;display:flex;align-items:center;border-bottom:1px solid #24272a;position:relative;touch-action:none;cursor:move}
+.brand{font-size:13px;font-weight:700;letter-spacing:.8px;margin-left:12px;color:#f5f5f5}
+.version{font-size:9px;color:#777;margin-left:7px}
+.statusbar{height:22px;display:flex;align-items:center;padding:0 10px;background:#121518;border-bottom:1px solid #202428;font-size:9px;color:#8e949a;gap:10px;white-space:nowrap}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#46c06f;margin-right:4px;vertical-align:middle}
+.statusbar b{font-weight:500;color:#b9bec3} .statusbar .spacer{flex:1} .statusbar .profile{color:#d85d5d}
+.aybody{height:calc(100% - 50px);overflow:hidden;display:flex}
+.sidebar{width:92px;background:#0b0d0f;border-right:1px solid #22262a;padding:7px 5px;flex:none}
+.tabbtn{height:34px;display:flex;align-items:center;padding:0 9px;margin-bottom:3px;border-radius:4px;color:#8f969c;font-size:11px;cursor:pointer;transition:.12s}
+.tabbtn .ico{width:18px;color:inherit;font-size:12px}
+.tabbtn.active{background:#6f2929;color:#fff} .tabbtn:hover{background:#24282c;color:#fff}
+.content{flex:1;overflow-y:auto;padding:8px 10px 12px;background:#121416;touch-action:pan-y}
+.content::-webkit-scrollbar{width:4px} .content::-webkit-scrollbar-thumb{background:#34393d;border-radius:4px}
+.section{border:1px solid #262a2e;border-radius:5px;background:#0e1012;margin-bottom:8px;overflow:hidden}
+.section-title{height:27px;display:flex;align-items:center;padding:0 9px;background:#171a1d;border-bottom:1px solid #262a2e;font-size:11px;color:#d8dadd;font-weight:600;cursor:pointer}
+.arrow{font-size:10px;margin-right:6px;color:#8b9298;width:9px}
+.section-body{padding:6px 8px 7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;column-gap:5px}
+.row{display:flex;align-items:center;gap:7px;margin:6px 0;min-height:24px}
+.rowlabel{font-size:10px;color:#aeb4b9;width:67px;flex:none}
+.rowvalue{width:43px;text-align:right;font-size:9px;color:#d26464}
+.tiny{font-size:9px;color:#697076}
+.divider{height:1px;background:#22262a;margin:7px 0}
+
+.check{display:flex;align-items:center;gap:5px;margin:4px 4px 4px 0;min-width:125px;font-size:10px;color:#b7bdc2;cursor:pointer;height:18px}
+.check input{display:none}
+.check .box{width:13px;height:13px;border:1px solid #3b4044;background:#15181a;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.check input:checked+.box{background:#a93d3d;border-color:#a93d3d}
+.check input:checked+.box:after{content:"";width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);margin-top:-1px}
+.check input:checked~.checktext{color:#f0f1f2}
+
+input[type=range]{appearance:none;-webkit-appearance:none;flex:1;height:18px;background:transparent;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:#292e32;border-radius:2px}
+input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#151719;border:2px solid #c04a4a;margin-top:-3.5px}
+select{flex:1;height:24px;background:#171a1d;border:1px solid #30353a;border-radius:3px;color:#d9dcdf;font-size:10px;padding:0 7px;outline:none;min-width:0}
+select option{background:#15181b;color:#cbd0d4}
+
+.pillrow{display:flex;align-items:center;gap:5px;margin:6px 0 2px}
+.pill{padding:4px 7px;border:1px solid #30353a;border-radius:3px;font-size:9px;color:#8c9399;cursor:pointer;background:transparent}
+.pill.on{background:#702929;border-color:#8c3434;color:#fff}
+.hotkey{margin-left:auto;border:1px solid #34383c;background:#17191b;border-radius:3px;padding:2px 6px;font-size:9px;color:#8b9297}
+.footerline{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:#656c72;margin-top:3px;padding:0 2px}
+.footerline span{color:#656c72}
+
+.toast{position:fixed;left:50%;top:12%;transform:translateX(-50%) translateY(-10px);z-index:100;background:#141719;border:1px solid #2c3135;border-radius:4px;padding:8px 12px;font-size:10px;color:#d5d9dc;opacity:0;pointer-events:none;transition:.18s;box-shadow:0 8px 25px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok:before{content:"●";color:#46c06f;margin-right:6px} .toast.info:before{content:"●";color:#8b9298;margin-right:6px} .toast.bad:before{content:"●";color:#d85d5d;margin-right:6px}
+
+.auth{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#171a1d 0,#0a0b0c 62%,#070809 100%);padding:20px}
+.login-card{width:min(340px,92vw);background:#101214;border:1px solid #292d31;border-radius:9px;box-shadow:0 18px 55px rgba(0,0,0,.6);overflow:hidden}
+.login-head{height:38px;background:#090a0b;border-bottom:1px solid #24272a;display:flex;align-items:center;padding:0 13px}
+.login-head strong{font-size:13px;letter-spacing:.8px;color:#f5f5f5} .login-head span{margin-left:auto;font-size:9px;color:#777}
+.login-body{padding:18px 16px 16px}
+.login-label{font-size:10px;color:#90979d;margin-bottom:7px}
+.login-input{width:100%;height:36px;border:1px solid #30353a;border-radius:4px;background:#15181a;color:#edf0f2;outline:none;padding:0 10px;font-size:11px;letter-spacing:.2px;-webkit-user-select:text;user-select:text}
+.login-input:focus{border-color:#7b3030;box-shadow:0 0 0 1px rgba(169,61,61,.22)}
+.login-btn{width:100%;height:34px;margin-top:11px;border-radius:4px;background:#873131;color:#fff;font-size:11px;font-weight:600;cursor:pointer}
+.login-btn:active{background:#6f2929}
+.login-msg{height:24px;display:flex;align-items:flex-end;font-size:9px;color:#d85d5d}
+.login-meta{display:flex;justify-content:space-between;border-top:1px solid #23272a;margin-top:7px;padding-top:10px;font-size:9px;color:#656c72}
+.login-meta span{color:#656c72}
+.launcher{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;width:44px;height:44px;border-radius:50%;background:#7d2d2d;border:1px solid #9d3b3b;box-shadow:0 8px 22px rgba(0,0,0,.45);color:#fff;font-size:14px;font-weight:700;align-items:center;justify-content:center;cursor:pointer}
+
+.licensebox{border:1px solid #2a2e32;background:#121416;border-radius:4px;padding:8px;margin:7px 0 2px}
+.licensebox .lrow{display:flex;justify-content:space-between;font-size:9px;margin:3px 0;color:#777}
+.licensebox .lrow b{font-weight:500;color:#c9cdd0}
+.danger{border-color:#5e2929!important;color:#d86666!important}
+
+[hidden]{display:none!important}
+@media(max-width:480px){
+  .ayimgui{width:96vw;height:74vh;max-height:620px;left:2vw;top:13vh;transform:none}
+  .sidebar{width:84px}
+  .check{min-width:112px}
+}
+@media(max-height:560px){
+  .ayimgui{height:92vh;top:4vh}
+}
+</style>
+</head>
+<body>
+<div id="auth" class="auth">
+  <div class="login-card">
+    <div class="login-head"><strong>失控进化</strong><span>LOGIN</span></div>
+    <div class="login-body">
+      <div class="login-label">授权登录</div>
+      <input id="licenseInput" class="login-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="请输入授权码">
+      <button id="loginBtn" class="login-btn">登录</button>
+      <div id="loginMsg" class="login-msg"></div>
+      <div class="login-meta"><span>版本 1.8.6</span><span>状态 正常</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="panel" class="ayimgui no-select" hidden>
+  <div id="titlebar" class="aytitle">
+    <span class="brand">失控进化</span><span class="version">v1.8.6</span>
+  </div>
+  <div class="statusbar">
+    <span><i class="dot"></i><b>Ready</b></span>
+    <span>配置 <b id="profileStatus">Default</b></span>
+    <span>授权 <b id="licenseStatus">--</b></span>
+    <span class="spacer"></span><span class="profile">HOME 菜单</span>
+  </div>
+  <div class="aybody">
+    <div class="sidebar">
+      <div class="tabbtn active" data-tab="aim"><span class="ico">⊕</span>战斗</div>
+      <div class="tabbtn" data-tab="esp"><span class="ico">◉</span>透视</div>
+      <div class="tabbtn" data-tab="loot"><span class="ico">▣</span>物资</div>
+      <div class="tabbtn" data-tab="world"><span class="ico">⌖</span>世界</div>
+      <div class="tabbtn" data-tab="misc"><span class="ico">⚙</span>其他</div>
+    </div>
+
+    <div class="content">
+      <div class="tabpage" data-page="aim">
+        <div class="section">
+          <div class="section-title" data-collapse="aimSec"><span class="arrow">▼</span>AIM</div>
+          <div class="section-body" id="aimSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="aim"><span class="box"></span><span class="checktext">自动瞄准</span></label>
+              <label class="check"><input type="checkbox" data-flag="lock"><span class="box"></span><span class="checktext">锁定目标</span></label>
+              <label class="check"><input type="checkbox" data-flag="visible" checked><span class="box"></span><span class="checktext">可见检测</span></label>
+              <label class="check"><input type="checkbox" data-flag="team" checked><span class="box"></span><span class="checktext">过滤队友</span></label>
+              <label class="check"><input type="checkbox" data-flag="fovCircle" checked><span class="box"></span><span class="checktext">FOV 圆圈</span></label>
+              <label class="check"><input type="checkbox" data-flag="prediction"><span class="box"></span><span class="checktext">移动预判</span></label>
+            </div>
+            <div class="divider"></div>
+            <div class="row"><span class="rowlabel">瞄准部位</span><select data-setting="aimBone"><option>Head</option><option>Neck</option><option>Chest</option><option>Pelvis</option></select></div>
+            <div class="row"><span class="rowlabel">FOV</span><input type="range" min="15" max="360" value="110" data-setting="aimFov"><span class="rowvalue" data-value="aimFov">110°</span></div>
+            <div class="row"><span class="rowlabel">平滑度</span><input type="range" min="1" max="20" value="7" data-setting="smooth"><span class="rowvalue" data-value="smooth">7</span></div>
+            <div class="row"><span class="rowlabel">最大距离</span><input type="range" min="50" max="500" step="10" value="240" data-setting="aimDistance"><span class="rowvalue" data-value="aimDistance">240m</span></div>
+            <div class="pillrow"><span class="tiny">触发键</span><span class="pill on" data-pill-group="aimKey" data-pill="开火">开火</span><span class="pill" data-pill-group="aimKey" data-pill="开镜">开镜</span><span class="pill" data-pill-group="aimKey" data-pill="始终">始终</span><span class="hotkey" data-hotkey="aimKey">开火</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title" data-collapse="weaponSec"><span class="arrow">▼</span>WEAPON</div>
+          <div class="section-body" id="weaponSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="recoil"><span class="box"></span><span class="checktext">后坐力控制</span></label>
+              <label class="check"><input type="checkbox" data-flag="spread"><span class="box"></span><span class="checktext">散布控制</span></label>
+              <label class="check"><input type="checkbox" data-flag="sway"><span class="box"></span><span class="checktext">机瞄晃动抑制</span></label>
+              <label class="check"><input type="checkbox" data-flag="crosshair"><span class="box"></span><span class="checktext">准星显示</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">压枪强度</span><input type="range" min="0" max="100" value="78" data-setting="recoil"><span class="rowvalue" data-value="recoil">78%</span></div>
+            <div class="row"><span class="rowlabel">散布强度</span><input type="range" min="0" max="100" value="72" data-setting="spread"><span class="rowvalue" data-value="spread">72%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabpage" data-page="esp" hidden>
+        <div class="section">
+          <div class="section-title" data-collapse="playerSec"><span class="arrow">▼</span>PLAYER ESP</div>
+          <div class="section-body" id="playerSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="box" checked><span class="box"></span><span class="checktext">玩家方框</span></label>
+              <label class="check"><input type="checkbox" data-flag="skeleton"><span class="box"></span><span class="checktext">骨骼</span></label>
+              <label class="check"><input type="checkbox" data-flag="name" checked><span class="box"></span><span class="checktext">名称</span></label>
+              <label class="check"><input type="checkbox" data-flag="health" checked><span class="box"></span><span class="checktext">血量</span></label>
+              <label class="check"><input type="checkbox" data-flag="distance" checked><span class="box"></span><span class="checktext">距离</span></label>
+              <label class="check"><input type="checkbox" data-flag="weapon" checked><span class="box"></span><span class="checktext">手持武器</span></label>
+              <label class="check"><input type="checkbox" data-flag="snapline"><span class="box"></span><span class="checktext">射线</span></label>
+              <label class="check"><input type="checkbox" data-flag="offscreen" checked><span class="box"></span><span class="checktext">屏外箭头</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">显示距离</span><input type="range" min="50" max="600" step="10" value="350" data-setting="espDistance"><span class="rowvalue" data-value="espDistance">350m</span></div>
+            <div class="row"><span class="rowlabel">方框样式</span><select data-setting="boxStyle"><option>2D Box</option><option selected>Corner</option><option>Filled</option></select></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title" data-collapse="radarSec"><span class="arrow">▼</span>RADAR</div>
+          <div class="section-body" id="radarSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="radar"><span class="box"></span><span class="checktext">雷达</span></label>
+              <label class="check"><input type="checkbox" data-flag="radarTeam" checked><span class="box"></span><span class="checktext">队友标记</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">雷达范围</span><input type="range" min="50" max="500" step="10" value="220" data-setting="radarRange"><span class="rowvalue" data-value="radarRange">220m</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabpage" data-page="loot" hidden>
+        <div class="section">
+          <div class="section-title" data-collapse="lootSec"><span class="arrow">▼</span>LOOT ESP</div>
+          <div class="section-body" id="lootSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="crate" checked><span class="box"></span><span class="checktext">战利品箱</span></label>
+              <label class="check"><input type="checkbox" data-flag="drop" checked><span class="box"></span><span class="checktext">掉落物</span></label>
+              <label class="check"><input type="checkbox" data-flag="scrap" checked><span class="box"></span><span class="checktext">道路物资</span></label>
+              <label class="check"><input type="checkbox" data-flag="ore" checked><span class="box"></span><span class="checktext">矿物资源</span></label>
+              <label class="check"><input type="checkbox" data-flag="cardG" checked><span class="box"></span><span class="checktext">绿色钥匙卡</span></label>
+              <label class="check"><input type="checkbox" data-flag="cardB" checked><span class="box"></span><span class="checktext">蓝色钥匙卡</span></label>
+              <label class="check"><input type="checkbox" data-flag="cardR" checked><span class="box"></span><span class="checktext">红色钥匙卡</span></label>
+              <label class="check"><input type="checkbox" data-flag="supply" checked><span class="box"></span><span class="checktext">补给容器</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">显示距离</span><input type="range" min="30" max="800" step="10" value="450" data-setting="lootDistance"><span class="rowvalue" data-value="lootDistance">450m</span></div>
+            <div class="row"><span class="rowlabel">最低品质</span><select data-setting="lootQuality"><option selected>全部</option><option>普通+</option><option>稀有+</option><option>史诗+</option></select></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title" data-collapse="vehicleSec"><span class="arrow">▼</span>VEHICLE</div>
+          <div class="section-body" id="vehicleSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="horse" checked><span class="box"></span><span class="checktext">马匹</span></label>
+              <label class="check"><input type="checkbox" data-flag="boat" checked><span class="box"></span><span class="checktext">船只</span></label>
+              <label class="check"><input type="checkbox" data-flag="rail" checked><span class="box"></span><span class="checktext">轨道车</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabpage" data-page="world" hidden>
+        <div class="section">
+          <div class="section-title" data-collapse="baseSec"><span class="arrow">▼</span>BASE ESP</div>
+          <div class="section-body" id="baseSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="cupboard" checked><span class="box"></span><span class="checktext">领地柜</span></label>
+              <label class="check"><input type="checkbox" data-flag="baseRange"><span class="box"></span><span class="checktext">领地范围</span></label>
+              <label class="check"><input type="checkbox" data-flag="door"><span class="box"></span><span class="checktext">门</span></label>
+              <label class="check"><input type="checkbox" data-flag="storage" checked><span class="box"></span><span class="checktext">储物箱</span></label>
+              <label class="check"><input type="checkbox" data-flag="wall"><span class="box"></span><span class="checktext">建筑轮廓</span></label>
+              <label class="check"><input type="checkbox" data-flag="stash"><span class="box"></span><span class="checktext">隐藏储物</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">显示距离</span><input type="range" min="50" max="800" step="10" value="500" data-setting="baseDistance"><span class="rowvalue" data-value="baseDistance">500m</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title" data-collapse="entitySec"><span class="arrow">▼</span>ENTITY</div>
+          <div class="section-body" id="entitySec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="workbench"><span class="box"></span><span class="checktext">工作台</span></label>
+              <label class="check"><input type="checkbox" data-flag="recycler"><span class="box"></span><span class="checktext">分解机</span></label>
+              <label class="check"><input type="checkbox" data-flag="safezone"><span class="box"></span><span class="checktext">安全区边界</span></label>
+              <label class="check"><input type="checkbox" data-flag="monument" checked><span class="box"></span><span class="checktext">据点标记</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabpage" data-page="misc" hidden>
+        <div class="section">
+          <div class="section-title" data-collapse="moveSec"><span class="arrow">▼</span>MOVEMENT</div>
+          <div class="section-body" id="moveSec">
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="speed"><span class="box"></span><span class="checktext">移动加速</span></label>
+              <label class="check"><input type="checkbox" data-flag="noclip"><span class="box"></span><span class="checktext">穿墙</span></label>
+            </div>
+            <div class="row"><span class="rowlabel">速度倍率</span><input type="range" min="100" max="250" step="5" value="125" data-setting="speedValue"><span class="rowvalue" data-value="speedValue">1.25x</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title" data-collapse="configSec"><span class="arrow">▼</span>CONFIG</div>
+          <div class="section-body" id="configSec">
+            <div class="row"><span class="rowlabel">配置文件</span><select data-setting="profile" id="profileSelect"><option>Default</option><option>Legit</option><option>Rage</option></select></div>
+            <div class="grid2">
+              <label class="check"><input type="checkbox" data-flag="stream"><span class="box"></span><span class="checktext">隐藏菜单截图</span></label>
+              <label class="check"><input type="checkbox" data-flag="watermark" checked><span class="box"></span><span class="checktext">水印</span></label>
+            </div>
+            <div class="pillrow"><button class="pill on" id="saveConfig">SAVE</button><button class="pill" id="resetConfig">RESET</button><span class="hotkey">HOME</span></div>
+            <div class="licensebox">
+              <div class="lrow"><span>授权类型</span><b id="licenseType">--</b></div>
+              <div class="lrow"><span>剩余时间</span><b id="licenseRemain">--</b></div>
+              <div class="lrow"><span>开通时间</span><b id="licenseStart">--</b></div>
+            </div>
+            <div class="pillrow"><button class="pill danger" id="switchLicense">更换授权</button></div>
+          </div>
+        </div>
+        <div class="footerline"><span>Build 260821</span><span id="activeCount">0 active</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="launcher" class="launcher">SK</button>
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+
+const LICENSE_DB = {
+  day: ["66370f0024be6f2503e51c42ff1e4d172dbdc061aa63c6052d424db4f15d98cf", "e3a716e962cde5899116b06b76821d4ce9f0ed4e005d80f9dfe7ef9553dbe55b", "c802c222f57ceef9f1cd88f82965c39e57426ffb7e4a8cfdb0dd98c5feeb0340", "215f67aa611be5f8e77f90302d36d3ea17cc2fdd32119c1ece9f9094078b8579"],
+  month: ["3701bc6a97cc607be295b0760e0e29e2d3c8f066c9641509be6e22c59c1b065a", "222cdd2923e9f32378d77dca68b4c2c4de7db58c61534d31f1eff562418a8783", "8de100fb1b097a52f7220a2bbb1298f2b21fd071db5a06f4237a8a92ddadf081"],
+  permanent: ["dbdf45e931d45c9dab159530a49e4df1af203b6739af006fd19df48a01c11f4c", "36be0dcc7ea1042ca7dd347164559018be514b26792c83e3a8f1d290fdef1e67", "4588335b8f23769d1e7a21924689ced08f043ab1672b72d32190b2dadd6fe724"]
+};
+const TYPE_META = {
+  day: {label:"天卡", duration:24*60*60*1000},
+  month: {label:"月卡", duration:30*24*60*60*1000},
+  permanent: {label:"永久卡", duration:null}
+};
+const STORE_CURRENT = "skjh_current_license_v1";
+const STORE_CONFIG = "skjh_ui_config_v1";
+const CLOCK_TOLERANCE = 10*60*1000;
+
+const defaults = {
+  profile:"Default", aimBone:"Head", aimFov:110, smooth:7, aimDistance:240, recoil:78, spread:72,
+  espDistance:350, boxStyle:"Corner", radarRange:220, lootDistance:450, lootQuality:"全部", baseDistance:500, speedValue:125,
+  aimKey:"开火"
+};
+
+let currentLicense = null;
+let toastTimer = 0;
+
+function digestKey(ascii) {
+  function rightRotate(value, amount) { return (value>>>amount) | (value<<(32-amount)); }
+  const mathPow = Math.pow, maxWord = mathPow(2,32), lengthProperty="length";
+  let i,j,result="",words=[],asciiBitLength=ascii[lengthProperty]*8;
+  let hash=digestKey.h=digestKey.h||[], k=digestKey.k=digestKey.k||[], primeCounter=k[lengthProperty];
+  const isComposite={};
+  for(let candidate=2; primeCounter<64; candidate++) {
+    if(!isComposite[candidate]) {
+      for(i=0;i<313;i+=candidate) isComposite[i]=candidate;
+      hash[primeCounter]=(mathPow(candidate,.5)*maxWord)|0;
+      k[primeCounter++]=(mathPow(candidate,1/3)*maxWord)|0;
+    }
+  }
+  ascii += "\x80";
+  while(ascii[lengthProperty]%64-56) ascii += "\x00";
+  for(i=0;i<ascii[lengthProperty];i++) {
+    j=ascii.charCodeAt(i);
+    if(j>>8) return "";
+    words[i>>2] |= j << ((3-i)%4)*8;
+  }
+  words[words[lengthProperty]]=((asciiBitLength/maxWord)|0);
+  words[words[lengthProperty]]=asciiBitLength;
+  for(j=0;j<words[lengthProperty];) {
+    const w=words.slice(j,j+=16), oldHash=hash.slice(0);
+    hash=hash.slice(0,8);
+    for(i=0;i<64;i++) {
+      const i2=i+j, w15=w[i-15], w2=w[i-2];
+      const a=hash[0], e=hash[4];
+      const temp1=hash[7]+(rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+
+        (w[i]=(i<16)?w[i]:((w[i-16]+(rightRotate(w15,7)^rightRotate(w15,18)^(w15>>>3))+w[i-7]+(rightRotate(w2,17)^rightRotate(w2,19)^(w2>>>10)))|0));
+      const temp2=(rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(temp1+temp2)|0].concat(hash);
+      hash[4]=(hash[4]+temp1)|0;
+      hash.pop();
+    }
+    for(i=0;i<8;i++) hash[i]=(hash[i]+oldHash[i])|0;
+  }
+  for(i=0;i<8;i++) for(j=3;j+1;j--) {
+    const b=(hash[i]>>(j*8))&255;
+    result += ((b<16)?"0":"")+b.toString(16);
+  }
+  return result;
+}
+
+function safeParse(s, fallback) { try { return JSON.parse(s); } catch(e) { return fallback; } }
+function fmtDate(ts) {
+  if(!ts) return "--";
+  const d=new Date(ts), p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+function fmtRemain(ms) {
+  if(ms===Infinity) return "永久";
+  if(ms<=0) return "已过期";
+  const d=Math.floor(ms/86400000); ms%=86400000;
+  const h=Math.floor(ms/3600000); ms%=3600000;
+  const m=Math.floor(ms/60000);
+  return (d?d+"天 ":"")+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+}
+function toast(msg,type="info") {
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.className="toast "+type+" show";
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.className="toast",900);
+}
+function findType(hash) {
+  for(const type of Object.keys(LICENSE_DB)) if(LICENSE_DB[type].includes(hash)) return type;
+  return null;
+}
+function activationStorageKey(hash) { return "skjh_activation_"+hash.slice(0,24); }
+
+function loadActivation(hash,type,createIfMissing) {
+  const key=activationStorageKey(hash);
+  let rec=safeParse(localStorage.getItem(key),null);
+  const now=Date.now();
+  if(!rec && createIfMissing) {
+    rec={hash,type,startedAt:now,lastSeen:now};
+    localStorage.setItem(key,JSON.stringify(rec));
+  }
+  if(!rec) return {ok:false,reason:"not_activated"};
+  if(rec.hash!==hash || rec.type!==type) return {ok:false,reason:"invalid_record"};
+  if(rec.lastSeen && now + CLOCK_TOLERANCE < rec.lastSeen) return {ok:false,reason:"clock"};
+  rec.lastSeen=Math.max(rec.lastSeen||0,now);
+  localStorage.setItem(key,JSON.stringify(rec));
+  const meta=TYPE_META[type];
+  const expiresAt=meta.duration===null?null:(rec.startedAt+meta.duration);
+  if(expiresAt!==null && now>=expiresAt) return {ok:false,reason:"expired",rec,expiresAt};
+  return {ok:true,rec,expiresAt};
+}
+
+function applyLicense(hash,type,activation) {
+  currentLicense={hash,type,startedAt:activation.rec.startedAt,expiresAt:activation.expiresAt};
+  localStorage.setItem(STORE_CURRENT,JSON.stringify({hash,type}));
+  document.getElementById("auth").hidden=true;
+  document.getElementById("panel").hidden=false;
+  document.getElementById("launcher").style.display="none";
+  updateLicenseUI();
+  restoreConfig();
+}
+
+function login() {
+  const input=document.getElementById("licenseInput");
+  const msg=document.getElementById("loginMsg");
+  const raw=input.value.trim();
+  msg.textContent="";
+  if(!raw) { msg.textContent="请输入授权码"; return; }
+  const hash=digestKey(raw);
+  const type=findType(hash);
+  if(!type) { msg.textContent="授权码无效"; input.select(); return; }
+  const activation=loadActivation(hash,type,true);
+  if(!activation.ok) {
+    msg.textContent=activation.reason==="expired"?"授权已到期":activation.reason==="clock"?"系统时间异常，请校准时间":"授权状态异常";
+    return;
+  }
+  input.value="";
+  applyLicense(hash,type,activation);
+  toast("登录成功","ok");
+}
+
+function autoLogin() {
+  const cur=safeParse(localStorage.getItem(STORE_CURRENT),null);
+  if(!cur || !cur.hash || !cur.type || findType(cur.hash)!==cur.type) return false;
+  const activation=loadActivation(cur.hash,cur.type,false);
+  if(!activation.ok) {
+    localStorage.removeItem(STORE_CURRENT);
+    return false;
+  }
+  applyLicense(cur.hash,cur.type,activation);
+  return true;
+}
+
+function updateLicenseUI() {
+  if(!currentLicense) return;
+  const meta=TYPE_META[currentLicense.type];
+  document.getElementById("licenseStatus").textContent=meta.label;
+  document.getElementById("licenseType").textContent=meta.label;
+  document.getElementById("licenseStart").textContent=fmtDate(currentLicense.startedAt);
+  const remain=currentLicense.expiresAt===null?Infinity:(currentLicense.expiresAt-Date.now());
+  document.getElementById("licenseRemain").textContent=fmtRemain(remain);
+  if(remain!==Infinity && remain<=0) {
+    localStorage.removeItem(STORE_CURRENT);
+    currentLicense=null;
+    document.getElementById("panel").hidden=true;
+    document.getElementById("launcher").style.display="none";
+    document.getElementById("auth").hidden=false;
+    document.getElementById("loginMsg").textContent="授权已到期";
+  }
+}
+
+function activeCount() {
+  return document.querySelectorAll('input[data-flag]:checked').length;
+}
+function updateActiveCount() {
+  document.getElementById("activeCount").textContent=activeCount()+" active";
+}
+
+function updateRange(el) {
+  const key=el.dataset.setting, value=el.value;
+  const out=document.querySelector('[data-value="'+key+'"]');
+  if(!out) return;
+  const suffix={aimFov:"°",aimDistance:"m",espDistance:"m",radarRange:"m",lootDistance:"m",baseDistance:"m",recoil:"%",spread:"%"}[key]||"";
+  out.textContent=key==="speedValue"?(Number(value)/100).toFixed(2)+"x":value+suffix;
+}
+
+function collectConfig() {
+  const cfg={settings:{},flags:{},pills:{aimKey:(document.querySelector('[data-hotkey="aimKey"]')||{}).textContent||"开火"}};
+  document.querySelectorAll("[data-setting]").forEach(el=>cfg.settings[el.dataset.setting]=el.value);
+  document.querySelectorAll("input[data-flag]").forEach(el=>cfg.flags[el.dataset.flag]=el.checked);
+  return cfg;
+}
+function applyConfig(cfg) {
+  if(!cfg) return;
+  if(cfg.settings) document.querySelectorAll("[data-setting]").forEach(el=>{
+    if(Object.prototype.hasOwnProperty.call(cfg.settings,el.dataset.setting)) {
+      el.value=cfg.settings[el.dataset.setting];
+      if(el.type==="range") updateRange(el);
+    }
+  });
+  if(cfg.flags) document.querySelectorAll("input[data-flag]").forEach(el=>{
+    if(Object.prototype.hasOwnProperty.call(cfg.flags,el.dataset.flag)) el.checked=!!cfg.flags[el.dataset.flag];
+  });
+  if(cfg.pills&&cfg.pills.aimKey) selectPill("aimKey",cfg.pills.aimKey);
+  document.getElementById("profileStatus").textContent=document.getElementById("profileSelect").value;
+  updateActiveCount();
+}
+function restoreConfig() { applyConfig(safeParse(localStorage.getItem(STORE_CONFIG),null)); }
+function saveConfig() {
+  localStorage.setItem(STORE_CONFIG,JSON.stringify(collectConfig()));
+  toast("Config saved","ok");
+}
+function resetConfig() {
+  localStorage.removeItem(STORE_CONFIG);
+  document.querySelectorAll("[data-setting]").forEach(el=>{
+    const k=el.dataset.setting;
+    if(Object.prototype.hasOwnProperty.call(defaults,k)) el.value=defaults[k];
+    if(el.type==="range") updateRange(el);
+  });
+  const defaultsOn=new Set(["visible","team","fovCircle","box","name","health","distance","weapon","offscreen","radarTeam","crate","drop","scrap","ore","cardG","cardB","cardR","supply","horse","boat","rail","cupboard","storage","monument","watermark"]);
+  document.querySelectorAll("input[data-flag]").forEach(el=>el.checked=defaultsOn.has(el.dataset.flag));
+  selectPill("aimKey","开火");
+  document.getElementById("profileStatus").textContent="Default";
+  updateActiveCount();
+  toast("Config reset","info");
+}
+function selectPill(group,value) {
+  document.querySelectorAll('[data-pill-group="'+group+'"]').forEach(el=>el.classList.toggle("on",el.dataset.pill===value));
+  const hk=document.querySelector('[data-hotkey="'+group+'"]'); if(hk) hk.textContent=value;
+}
+
+document.getElementById("loginBtn").addEventListener("click",login);
+document.getElementById("licenseInput").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+
+document.querySelectorAll(".tabbtn").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".tabbtn").forEach(x=>x.classList.toggle("active",x===btn));
+  document.querySelectorAll(".tabpage").forEach(p=>p.hidden=p.dataset.page!==btn.dataset.tab);
+}));
+
+document.querySelectorAll("[data-collapse]").forEach(title=>title.addEventListener("click",()=>{
+  const body=document.getElementById(title.dataset.collapse);
+  body.hidden=!body.hidden;
+  title.querySelector(".arrow").textContent=body.hidden?"▶":"▼";
+}));
+
+document.querySelectorAll('input[type="range"][data-setting]').forEach(el=>{
+  el.addEventListener("input",()=>updateRange(el));
+});
+document.querySelectorAll("input[data-flag]").forEach(el=>el.addEventListener("change",()=>{
+  updateActiveCount();
+  toast(el.closest(".check").querySelector(".checktext").textContent+"  "+(el.checked?"Enabled":"Disabled"),el.checked?"ok":"info");
+}));
+document.querySelectorAll("select[data-setting]").forEach(el=>el.addEventListener("change",()=>{
+  if(el.dataset.setting==="profile") document.getElementById("profileStatus").textContent=el.value;
+}));
+document.querySelectorAll("[data-pill-group]").forEach(el=>el.addEventListener("click",()=>selectPill(el.dataset.pillGroup,el.dataset.pill)));
+
+document.getElementById("saveConfig").addEventListener("click",saveConfig);
+document.getElementById("resetConfig").addEventListener("click",resetConfig);
+document.getElementById("switchLicense").addEventListener("click",()=>{
+  localStorage.removeItem(STORE_CURRENT);
+  currentLicense=null;
+  document.getElementById("panel").hidden=true;
+  document.getElementById("launcher").style.display="none";
+  document.getElementById("auth").hidden=false;
+  document.getElementById("loginMsg").textContent="";
+  setTimeout(()=>document.getElementById("licenseInput").focus(),30);
+});
+
+document.getElementById("launcher").addEventListener("click",()=>{
+  document.getElementById("panel").style.display="block";
+  document.getElementById("launcher").style.display="none";
+});
+
+/* Pointer-based dragging works in Android WebView and desktop browsers. */
+(() => {
+  const panel=document.getElementById("panel"), bar=document.getElementById("titlebar");
+  let dragging=false,sx=0,sy=0,left=0,top=0;
+  bar.addEventListener("pointerdown",e=>{
+    const r=panel.getBoundingClientRect();
+    dragging=true;sx=e.clientX;sy=e.clientY;left=r.left;top=r.top;
+    panel.style.transform="none";panel.style.left=left+"px";panel.style.top=top+"px";
+    try{bar.setPointerCapture(e.pointerId)}catch(_e){}
+  });
+  bar.addEventListener("pointermove",e=>{
+    if(!dragging)return;
+    const maxX=Math.max(0,window.innerWidth-panel.offsetWidth), maxY=Math.max(0,window.innerHeight-panel.offsetHeight);
+    panel.style.left=Math.min(maxX,Math.max(0,left+e.clientX-sx))+"px";
+    panel.style.top=Math.min(maxY,Math.max(0,top+e.clientY-sy))+"px";
+  });
+  const end=()=>dragging=false;
+  bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end);
+})();
+
+window.addEventListener("resize",()=>{
+  const p=document.getElementById("panel");
+  if(p.hidden||p.style.display==="none")return;
+  const r=p.getBoundingClientRect();
+  if(r.right>innerWidth)p.style.left=Math.max(0,innerWidth-p.offsetWidth)+"px";
+  if(r.bottom>innerHeight)p.style.top=Math.max(0,innerHeight-p.offsetHeight)+"px";
+});
+
+updateActiveCount();
+setInterval(updateLicenseUI,15000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) updateLicenseUI(); });
+window.addEventListener("pageshow",()=>updateLicenseUI());
+autoLogin();
+</script>
+</body>
+</html>
