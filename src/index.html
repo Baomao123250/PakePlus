@@ -1,0 +1,4924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🧙‍♀️ 女巫的毒药 · 联机版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 20%, #1a0a2e, #0d0618 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f0e6ff;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 880px;
+            background: rgba(20, 10, 40, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 48px;
+            padding: 32px 28px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(160, 100, 255, 0.15);
+            border: 1px solid rgba(180, 120, 255, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle at 70% 30%, rgba(120, 60, 255, 0.06), transparent 60%);
+            pointer-events: none;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            font-size: 36px;
+            line-height: 1;
+            filter: drop-shadow(0 0 12px rgba(180, 100, 255, 0.4));
+        }
+        .logo-text {
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4b0ff, #a070ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        .logo-sub {
+            font-size: 13px;
+            color: #8870aa;
+            -webkit-text-fill-color: #8870aa;
+            font-weight: 400;
+            margin-left: 2px;
+        }
+        .game-code-badge {
+            background: rgba(160, 100, 255, 0.15);
+            border: 1px solid rgba(160, 100, 255, 0.25);
+            padding: 6px 18px 6px 16px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #c8a8ff;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+        }
+        .game-code-badge .copy-btn {
+            background: none;
+            border: none;
+            color: #a888dd;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 4px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .game-code-badge .copy-btn:hover {
+            color: #dcc0ff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .status-bar {
+            text-align: center;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            border-radius: 20px;
+            background: rgba(80, 40, 160, 0.12);
+            border: 1px solid rgba(160, 100, 255, 0.08);
+            font-size: 16px;
+            font-weight: 500;
+            color: #c8b0ee;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            min-height: 52px;
+        }
+        .status-bar .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #6fcf97;
+            animation: pulse 1.8s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        .status-bar .waiting-spin {
+            display: inline-block;
+            animation: spin 2s linear infinite;
+            font-size: 20px;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .screen {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .home-title {
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            color: #dcc0ff;
+            margin-bottom: 8px;
+        }
+        .home-desc {
+            text-align: center;
+            color: #9988bb;
+            font-size: 15px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+        .home-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 60px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #e0d0f0;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(100, 60, 200, 0.25);
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #7b4dca, #5b2fa0);
+            color: #fff;
+            border: 1px solid rgba(160, 100, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(90, 40, 180, 0.3);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 40px rgba(90, 40, 180, 0.45);
+            background: linear-gradient(135deg, #8d5fdc, #6a3ab0);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(160, 100, 255, 0.15);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(160, 100, 255, 0.3);
+        }
+        .btn-small {
+            padding: 8px 20px;
+            font-size: 14px;
+            border-radius: 40px;
+        }
+        .btn-danger {
+            background: rgba(200, 50, 80, 0.2);
+            border-color: rgba(200, 50, 80, 0.2);
+            color: #f0a0b0;
+        }
+        .btn-danger:hover {
+            background: rgba(200, 50, 80, 0.3);
+            border-color: rgba(200, 50, 80, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #bbaaee;
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(160, 100, 255, 0.15);
+            background: rgba(10, 5, 25, 0.5);
+            color: #f0e6ff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.25s;
+            backdrop-filter: blur(4px);
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: rgba(160, 100, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(120, 60, 220, 0.15);
+        }
+        .form-group input::placeholder {
+            color: #665588;
+        }
+        .form-group select option {
+            background: #1a0a2e;
+            color: #f0e6ff;
+        }
+        .form-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 140px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .mode-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(160, 100, 255, 0.1);
+            cursor: pointer;
+            transition: 0.25s;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            color: #ccb8ee;
+        }
+        .mode-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(160, 100, 255, 0.2);
+        }
+        .mode-option.selected {
+            border-color: rgba(160, 100, 255, 0.5);
+            background: rgba(120, 60, 220, 0.15);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(120, 60, 220, 0.1);
+        }
+        .mode-option .mode-icon {
+            display: block;
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        .mode-option .mode-label {
+            font-size: 13px;
+        }
+
+        .hall-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .hall-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .hall-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .hall-controls .btn {
+            padding: 8px 18px;
+            font-size: 14px;
+        }
+        .room-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .room-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            transition: 0.2s;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .room-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(160, 100, 255, 0.1);
+        }
+        .room-card .room-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .room-card .room-info .host {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .room-card .room-info .status-badge {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 30px;
+            background: rgba(160, 100, 255, 0.1);
+            border: 1px solid rgba(160, 100, 255, 0.1);
+            color: #bbaaee;
+        }
+        .room-card .room-info .players {
+            font-size: 14px;
+            color: #9988bb;
+        }
+        .room-card .room-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .room-card .room-actions .btn {
+            padding: 6px 18px;
+            font-size: 13px;
+        }
+        .empty-hall {
+            text-align: center;
+            padding: 40px 16px;
+            color: #7766aa;
+        }
+        .empty-hall .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        .empty-hall .text {
+            font-size: 15px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+            gap: 14px;
+            margin: 16px 0 22px;
+            position: relative;
+        }
+        .emoji-card {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+        .emoji-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(160, 100, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .emoji-card:active {
+            transform: scale(0.93);
+        }
+        .emoji-card.selected {
+            border-color: rgba(160, 100, 255, 0.4);
+            background: rgba(120, 60, 220, 0.15);
+            box-shadow: 0 0 20px rgba(120, 60, 220, 0.15);
+        }
+        .emoji-card.poison-self {
+            border-color: rgba(255, 100, 150, 0.5);
+            background: rgba(200, 40, 80, 0.15);
+            box-shadow: 0 0 24px rgba(200, 40, 80, 0.15);
+        }
+        .emoji-card.poison-self::after {
+            content: '☠️';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 20px;
+            filter: drop-shadow(0 2px 8px rgba(255, 0, 0, 0.3));
+        }
+        .emoji-card.opponent-poison {
+            border-color: rgba(255, 200, 50, 0.3);
+            background: rgba(255, 200, 50, 0.06);
+        }
+        .emoji-card.used {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: none !important;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.02);
+            filter: grayscale(0.6);
+        }
+        .emoji-card.used:hover {
+            transform: none !important;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .emoji-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none !important;
+        }
+        .emoji-card.disabled:hover {
+            border-color: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.04);
+            transform: none;
+        }
+        .emoji-card .card-label {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .emoji-card .thinking-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: thinkPulse 1.2s ease-in-out infinite;
+            backdrop-filter: blur(2px);
+        }
+        @keyframes thinkPulse {
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .player-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 4px 14px 4px 10px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .player-tag .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #555;
+            flex-shrink: 0;
+        }
+        .player-tag.active-turn .dot {
+            background: #6fcf97;
+            box-shadow: 0 0 12px rgba(111, 207, 151, 0.4);
+        }
+        .player-tag.active-turn {
+            border-color: rgba(111, 207, 151, 0.2);
+            background: rgba(111, 207, 151, 0.06);
+        }
+        .player-tag .poison-status {
+            font-size: 12px;
+            color: #999;
+            margin-left: 4px;
+        }
+        .player-tag .poison-status.ready {
+            color: #6fcf97;
+        }
+        .turn-indicator {
+            font-size: 14px;
+            color: #bbaaee;
+            background: rgba(160, 100, 255, 0.06);
+            padding: 4px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(160, 100, 255, 0.06);
+        }
+        .ai-badge {
+            background: rgba(0, 200, 255, 0.10);
+            border: 1px solid rgba(0, 200, 255, 0.15);
+            border-radius: 30px;
+            padding: 2px 10px;
+            font-size: 11px;
+            color: #88ddff;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 28px 20px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .result-box .big-icon {
+            font-size: 64px;
+            margin-bottom: 8px;
+        }
+        .result-box .result-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .result-box .result-sub {
+            font-size: 16px;
+            color: #bbaaee;
+            margin-bottom: 16px;
+        }
+        .result-box .poison-reveal {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 16px 0 20px;
+            flex-wrap: wrap;
+        }
+        .result-box .poison-reveal .reveal-item {
+            text-align: center;
+        }
+        .result-box .poison-reveal .reveal-item .emoji {
+            font-size: 46px;
+        }
+        .result-box .poison-reveal .reveal-item .name {
+            font-size: 13px;
+            color: #9988bb;
+            margin-top: 2px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(30, 15, 60, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 14px 28px;
+            border-radius: 40px;
+            border: 1px solid rgba(160, 100, 255, 0.15);
+            color: #f0e6ff;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .handoff-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 5, 30, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 48px;
+            z-index: 50;
+            padding: 40px;
+            text-align: center;
+            animation: fadeSlide 0.4s ease;
+        }
+        .handoff-overlay .handoff-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+        }
+        .handoff-overlay .handoff-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .handoff-overlay .handoff-sub {
+            font-size: 16px;
+            color: #bbaaee;
+            margin-bottom: 24px;
+        }
+        .handoff-overlay .handoff-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: #dcc0ff;
+            margin-bottom: 24px;
+        }
+
+        /* 语音控制按钮 */
+        .voice-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 15, 60, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(160, 100, 255, 0.2);
+            border-radius: 40px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        .voice-toggle:hover {
+            background: rgba(50, 25, 90, 0.9);
+            border-color: rgba(160, 100, 255, 0.4);
+            transform: scale(1.05);
+        }
+        .voice-toggle .voice-icon {
+            font-size: 20px;
+        }
+        .voice-toggle .voice-label {
+            font-size: 13px;
+            color: #c8a8ff;
+            font-weight: 500;
+        }
+        .voice-toggle.disabled {
+            opacity: 0.5;
+        }
+        .voice-toggle.disabled .voice-icon {
+            filter: grayscale(1);
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                padding: 20px 16px 28px;
+                border-radius: 32px;
+            }
+            .logo-text {
+                font-size: 20px;
+            }
+            .logo-icon {
+                font-size: 28px;
+            }
+            .emoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 10px;
+            }
+            .emoji-card {
+                font-size: 32px;
+                border-radius: 16px;
+            }
+            .btn {
+                padding: 12px 28px;
+                font-size: 15px;
+            }
+            .home-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .game-info {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .player-tag {
+                justify-content: center;
+            }
+            .turn-indicator {
+                text-align: center;
+            }
+            .result-box .poison-reveal {
+                gap: 24px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .game-code-badge {
+                align-self: stretch;
+                justify-content: center;
+            }
+            .form-row {
+                flex-direction: column;
+            }
+            .status-bar {
+                font-size: 14px;
+                padding: 10px 14px;
+                min-height: 44px;
+            }
+            .room-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .room-card .room-info {
+                justify-content: center;
+            }
+            .room-card .room-actions {
+                justify-content: center;
+            }
+            .hall-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .hall-controls {
+                justify-content: center;
+            }
+            .mode-selector {
+                flex-direction: column;
+            }
+            .mode-option {
+                min-width: unset;
+                padding: 12px;
+            }
+            .handoff-overlay {
+                border-radius: 32px;
+                padding: 24px;
+            }
+            .handoff-overlay .handoff-icon {
+                font-size: 48px;
+            }
+            .handoff-overlay .handoff-title {
+                font-size: 22px;
+            }
+            .voice-toggle {
+                bottom: 12px;
+                right: 12px;
+                padding: 6px 12px;
+            }
+            .voice-toggle .voice-label {
+                display: none;
+            }
+        }
+        @media (max-width: 400px) {
+            .emoji-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .emoji-card {
+                font-size: 28px;
+                border-radius: 12px;
+            }
+            .app-container {
+                padding: 16px 12px 20px;
+                border-radius: 24px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(160, 100, 255, 0.2);
+            border-radius: 10px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .op-6 {
+            opacity: 0.6;
+        }
+        .text-sm {
+            font-size: 14px;
+        }
+        .text-xs {
+            font-size: 12px;
+        }
+        .poison-hint {
+            background: rgba(200, 40, 80, 0.06);
+            border: 1px dashed rgba(200, 40, 80, 0.15);
+            border-radius: 16px;
+            padding: 12px 18px;
+            font-size: 14px;
+            color: #cc99bb;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.04);
+            margin: 18px 0;
+        }
+        .skeleton {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            animation: shimmer 1.8s infinite;
+            min-height: 40px;
+        }
+        @keyframes shimmer {
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+        .empty-state {
+            text-align: center;
+            padding: 30px 16px;
+            color: #7766aa;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        .empty-state .text {
+            font-size: 15px;
+        }
+
+        /* ============================================================
+           💬 游戏内聊天框（新增）
+           ============================================================ */
+        .chat-panel {
+            margin-top: 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(160, 100, 255, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 200px;
+        }
+        .chat-panel .chat-header {
+            padding: 8px 16px;
+            background: rgba(160, 100, 255, 0.06);
+            font-size: 13px;
+            color: #bbaaee;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px solid rgba(160, 100, 255, 0.05);
+        }
+        .chat-panel .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 14px;
+            max-height: 120px;
+            min-height: 60px;
+        }
+        .chat-panel .chat-msg {
+            font-size: 13px;
+            margin-bottom: 4px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .chat-panel .chat-msg .chat-name {
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .chat-panel .chat-msg .chat-name.me {
+            color: #a0e0ff;
+        }
+        .chat-panel .chat-msg .chat-name.opponent {
+            color: #ffb0d0;
+        }
+        .chat-panel .chat-msg .chat-name.system {
+            color: #9988bb;
+        }
+        .chat-panel .chat-msg .chat-text {
+            color: #d0c0e8;
+        }
+        .chat-panel .chat-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-top: 1px solid rgba(160, 100, 255, 0.05);
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .chat-panel .chat-input-row input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(160, 100, 255, 0.1);
+            background: rgba(10, 5, 25, 0.5);
+            color: #f0e6ff;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-panel .chat-input-row input:focus {
+            border-color: rgba(160, 100, 255, 0.35);
+        }
+        .chat-panel .chat-input-row button {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #7b4dca, #5b2fa0);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chat-panel .chat-input-row button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(90, 40, 180, 0.3);
+        }
+
+        /* ============================================================
+           🌐 公共聊天室页面（新增）
+           ============================================================ */
+        .chatroom-container {
+            display: flex;
+            flex-direction: column;
+            height: 420px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(160, 100, 255, 0.08);
+            overflow: hidden;
+        }
+        .chatroom-header {
+            padding: 12px 20px;
+            background: rgba(160, 100, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(160, 100, 255, 0.06);
+        }
+        .chatroom-header .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #dcc0ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chatroom-header .online-count {
+            font-size: 12px;
+            color: #6fcf97;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .chatroom-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 20px;
+        }
+        .chatroom-msg {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .chatroom-msg .msg-name {
+            font-weight: 700;
+            margin-right: 6px;
+        }
+        .chatroom-msg .msg-name.host {
+            color: #ffb0d0;
+        }
+        .chatroom-msg .msg-name.guest {
+            color: #a0e0ff;
+        }
+        .chatroom-msg .msg-name.system {
+            color: #9988bb;
+            font-weight: 500;
+        }
+        .chatroom-msg .msg-text {
+            color: #d0c0e8;
+        }
+        .chatroom-msg .msg-text .challenge-link {
+            color: #d4b0ff;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .chatroom-msg .msg-text .challenge-link:hover {
+            color: #e8c8ff;
+        }
+        .chatroom-input-row {
+            display: flex;
+            gap: 10px;
+            padding: 12px 16px;
+            border-top: 1px solid rgba(160, 100, 255, 0.06);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .chatroom-input-row input {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(160, 100, 255, 0.12);
+            background: rgba(10, 5, 25, 0.5);
+            color: #f0e6ff;
+            font-size: 14px;
+            outline: none;
+        }
+        .chatroom-input-row input:focus {
+            border-color: rgba(160, 100, 255, 0.4);
+        }
+        .chatroom-input-row .btn-send {
+            padding: 10px 22px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, #7b4dca, #5b2fa0);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .chatroom-input-row .btn-send:hover {
+            box-shadow: 0 4px 16px rgba(90, 40, 180, 0.35);
+        }
+        .chatroom-input-row .btn-challenge {
+            padding: 10px 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(200, 80, 120, 0.3);
+            background: rgba(200, 50, 80, 0.15);
+            color: #f0a0b0;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .chatroom-input-row .btn-challenge:hover {
+            background: rgba(200, 50, 80, 0.25);
+        }
+
+        /* ============================================================
+           🎤 语音聊天按钮（新增）
+           ============================================================ */
+        .voice-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 140px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 15, 60, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 200, 255, 0.25);
+            border-radius: 40px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        .voice-chat-btn:hover {
+            background: rgba(50, 25, 90, 0.9);
+            border-color: rgba(0, 200, 255, 0.5);
+            transform: scale(1.05);
+        }
+        .voice-chat-btn .vc-icon {
+            font-size: 18px;
+        }
+        .voice-chat-btn .vc-label {
+            font-size: 12px;
+            color: #88ddff;
+            font-weight: 500;
+        }
+        .voice-chat-btn.recording {
+            border-color: #ff4060;
+            animation: recPulse 1s ease-in-out infinite;
+        }
+        .voice-chat-btn.recording .vc-icon { color: #ff4060; }
+        .voice-chat-btn.recording .vc-label { color: #ff4060; }
+        @keyframes recPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 64, 96, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 64, 96, 0); }
+        }
+        .voice-chat-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* 结果页聊天区域 */
+        .result-chat {
+            margin-top: 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(160, 100, 255, 0.06);
+            overflow: hidden;
+        }
+        .result-chat .chat-header {
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #bbaaee;
+            background: rgba(160, 100, 255, 0.04);
+            border-bottom: 1px solid rgba(160, 100, 255, 0.04);
+        }
+
+
+        /* ============================================================
+           📷 公共聊天室图片上传（新增）
+           ============================================================ */
+        .chatroom-input-row .btn-upload {
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(160, 100, 255, 0.25);
+            background: rgba(120, 60, 220, 0.12);
+            color: #c8a8ff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chatroom-input-row .btn-upload:hover {
+            background: rgba(120, 60, 220, 0.25);
+            border-color: rgba(160, 100, 255, 0.5);
+        }
+        .chatroom-input-row .btn-upload input[type="file"] {
+            display: none;
+        }
+        .chat-image-preview {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(120, 60, 220, 0.08);
+            border-top: 1px solid rgba(160, 100, 255, 0.06);
+        }
+        .chat-image-preview.active {
+            display: flex;
+        }
+        .chat-image-preview img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 10px;
+            border: 1px solid rgba(160, 100, 255, 0.2);
+        }
+        .chat-image-preview .preview-info {
+            flex: 1;
+            font-size: 13px;
+            color: #bbaaee;
+        }
+        .chat-image-preview .btn-cancel-img {
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            background: rgba(255, 100, 100, 0.1);
+            color: #ff8a8a;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .chat-image-preview .btn-cancel-img:hover {
+            background: rgba(255, 100, 100, 0.2);
+        }
+        .chat-image-preview .btn-send-img {
+            padding: 4px 14px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #7b4dca, #5b2fa0);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .chat-image-preview .btn-send-img:hover {
+            box-shadow: 0 2px 8px rgba(90, 40, 180, 0.3);
+        }
+        .chatroom-msg .msg-image {
+            display: block;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            margin-top: 4px;
+            border: 1px solid rgba(160, 100, 255, 0.15);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .chatroom-msg .msg-image:hover {
+            transform: scale(1.02);
+        }
+        .chatroom-msg .msg-image-wrap {
+            margin-top: 4px;
+        }
+        /* 图片全屏预览遮罩 */
+        .image-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        .image-overlay.active {
+            display: flex;
+        }
+        .image-overlay img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .image-overlay .overlay-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 36px;
+            color: #fff;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-overlay .overlay-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .voice-chat-btn {
+                right: 70px;
+                bottom: 12px;
+                padding: 6px 12px;
+            }
+            .voice-chat-btn .vc-label { display: none; }
+            .chatroom-container { height: 340px; }
+        }
+
+        /* ============================================================
+           🏆 排行榜样式
+           ============================================================ */
+        .leaderboard-container {
+            width: 100%;
+            max-width: 880px;
+            margin: 0 auto;
+        }
+        .leaderboard-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .leaderboard-tab {
+            padding: 10px 28px;
+            border-radius: 40px;
+            border: 1px solid rgba(160, 100, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+            color: #bbaaee;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .leaderboard-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(160, 100, 255, 0.35);
+        }
+        .leaderboard-tab.active {
+            background: linear-gradient(135deg, #7b4dca, #5b2fa0);
+            color: #fff;
+            border-color: rgba(160, 100, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(90, 40, 180, 0.3);
+        }
+        .leaderboard-panel {
+            display: none;
+        }
+        .leaderboard-panel.active {
+            display: block;
+        }
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            transition: 0.2s;
+        }
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(160, 100, 255, 0.15);
+        }
+        .leaderboard-item .rank {
+            font-size: 22px;
+            font-weight: 800;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .leaderboard-item .rank-1 { color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 0.4); }
+        .leaderboard-item .rank-2 { color: #c0c0c0; text-shadow: 0 0 8px rgba(192, 192, 192, 0.3); }
+        .leaderboard-item .rank-3 { color: #cd7f32; text-shadow: 0 0 8px rgba(205, 127, 50, 0.3); }
+        .leaderboard-item .rank-other { color: #9988bb; }
+        .leaderboard-item .player-avatar {
+            font-size: 28px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(160, 100, 255, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .leaderboard-item .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .leaderboard-item .player-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0d0f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .leaderboard-item .player-stats {
+            font-size: 12px;
+            color: #8877aa;
+            margin-top: 2px;
+        }
+        .leaderboard-item .player-score {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        .leaderboard-item .score-win {
+            background: rgba(111, 207, 151, 0.12);
+            color: #6fcf97;
+            border: 1px solid rgba(111, 207, 151, 0.2);
+        }
+        .leaderboard-item .score-lose {
+            background: rgba(255, 100, 100, 0.08);
+            color: #ff8a8a;
+            border: 1px solid rgba(255, 100, 100, 0.15);
+        }
+        .leaderboard-item .win-rate {
+            font-size: 13px;
+            color: #bbaaee;
+            margin-top: 2px;
+        }
+        .leaderboard-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7766aa;
+        }
+        .leaderboard-empty .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+        .leaderboard-empty .text {
+            font-size: 15px;
+        }
+        .leaderboard-summary {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .leaderboard-summary-item {
+            padding: 10px 24px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+        .leaderboard-summary-item .label {
+            font-size: 12px;
+            color: #8877aa;
+            margin-bottom: 4px;
+        }
+        .leaderboard-summary-item .value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .leaderboard-summary-item .value.win { color: #6fcf97; }
+        .leaderboard-summary-item .value.lose { color: #ff8a8a; }
+        .leaderboard-summary-item .value.total { color: #d4b0ff; }
+
+        /* ============================================================
+           🎵 全局音乐播放器（右上角，新增）
+           ============================================================ */
+        .music-player {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 2100;
+            background: rgba(30, 15, 62, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(160, 100, 255, 0.2);
+            border-radius: 40px;
+            padding: 5px 12px 5px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5);
+            transition: 0.3s;
+            user-select: none;
+        }
+        .music-player:hover {
+            border-color: rgba(160, 100, 255, 0.4);
+            background: rgba(40, 20, 80, 0.92);
+        }
+        .music-player .mp-btn {
+            background: none;
+            border: none;
+            color: #d4b0ff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: 0.2s;
+            line-height: 1;
+        }
+        .music-player .mp-btn:hover {
+            color: #fff;
+            background: rgba(160, 100, 255, 0.15);
+        }
+        .music-player .mp-select {
+            background: rgba(10, 5, 25, 0.6);
+            border: 1px solid rgba(160, 100, 255, 0.2);
+            color: #dcc0ff;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+            max-width: 130px;
+        }
+        .music-player .mp-select option {
+            background: #1a0a2e;
+            color: #f0e6ff;
+        }
+
+        @media (max-width: 640px) {
+            .music-player {
+                top: 8px;
+                right: 8px;
+                padding: 4px 10px 4px 12px;
+                gap: 6px;
+            }
+            .music-player .mp-select {
+                max-width: 90px;
+                font-size: 11px;
+                padding: 2px 8px;
+            }
+            .music-player .mp-btn {
+                font-size: 17px;
+            }
+        }
+
+        </style>
+</head>
+<body>
+
+<!-- 🎵 全局音乐播放器（右上角） -->
+<div class="music-player" id="musicPlayer">
+    <button class="mp-btn" id="mpPlayBtn" title="播放/暂停">▶️</button>
+    <select class="mp-select" id="mpTrackSelect">
+        <option value="0">🎵 叹云兮</option>
+        <option value="1">🎵 坏女孩</option>
+        <option value="2">🎵 背景</option>
+    </select>
+    <audio id="mpAudio" preload="metadata" style="display:none;"></audio>
+</div>
+
+
+    <div id="toast" class="toast"></div>
+
+    <!-- 语音开关按钮 -->
+    <div class="voice-toggle" id="voiceToggle" title="点击开关AI语音">
+        <span class="voice-icon">🔊</span>
+        <span class="voice-label">AI语音</span>
+    </div>
+
+    <!-- 新增：语音聊天按钮（游戏内开麦） -->
+    <div class="voice-chat-btn disabled" id="voiceChatBtn" title="点击开始/停止语音聊天">
+        <span class="vc-icon">🎤</span>
+        <span class="vc-label">语音聊天</span>
+    </div>
+
+    <div class="app-container" id="app">
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">🧙‍♀️</span>
+                <span class="logo-text">女巫的毒药 <span class="logo-sub">联机版</span></span>
+            </div>
+            <div id="gameCodeBadge" class="game-code-badge" style="display:none;">
+                🏷️ 游戏码 <span id="gameCodeDisplay">----</span>
+                <button class="copy-btn" id="copyCodeBtn" title="复制游戏码">📋</button>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            <span>🌙 欢迎来到女巫的毒药游戏</span>
+        </div>
+
+
+        <!-- 首页 -->
+        <div class="screen active" id="screenHome">
+            <div class="home-title">🧪 双人心理对决</div>
+            <div class="home-desc">
+                选择你的毒药，引诱对手触碰它。<br />
+                谁先点到对方设置的毒药，谁就输掉这场较量。
+            </div>
+            <div class="home-buttons">
+                <button class="btn btn-primary" id="btnCreateGame">🌿 创建游戏</button>
+                <button class="btn btn-secondary" id="btnJoinGame">🍷 输入码加入</button>
+                <button class="btn btn-secondary" id="btnHall">🌐 公共大厅</button>
+                <button class="btn btn-secondary" id="btnLocalGame">🕹️ 本地双人</button>
+                <button class="btn btn-secondary" id="btnAIGame">🤖 AI 对战</button>
+                <button class="btn btn-secondary" id="btnChatRoom">💬 公共聊天室</button>
+                <button class="btn btn-secondary" id="btnLeaderboard">🏆 排行榜</button>
+            </div>
+            <div class="divider"></div>
+            <div class="text-center text-xs op-6" style="color:#7766aa;">
+                🕯️ 每局使用 9 ~ 14 个不同表情包 · 秘密选择毒药 · 轮流试探
+            </div>
+        </div>
+
+        <!-- 创建/设置 -->
+        <div class="screen" id="screenCreate">
+            <h3 style="font-size:20px;font-weight:600;margin-bottom:20px;">⚙️ 游戏设置</h3>
+            <div class="form-group">
+                <label>你的昵称</label>
+                <input type="text" id="createName" placeholder="输入昵称..." maxlength="12" />
+            </div>
+            <div class="form-group">
+                <label>表情包数量 <span style="font-weight:400;color:#8877aa;">（9 ~ 14）</span></label>
+                <input type="number" id="createCount" min="9" max="14" value="9" />
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:14px;font-weight:500;color:#bbaaee;margin-bottom:8px;">选择模式</label>
+                <div class="mode-selector" id="modeSelector">
+                    <div class="mode-option selected" data-mode="online-public">
+                        <span class="mode-icon">🌐</span>
+                        <span class="mode-label">在线公共</span>
+                    </div>
+                    <div class="mode-option" data-mode="online-private">
+                        <span class="mode-icon">🔒</span>
+                        <span class="mode-label">在线私人</span>
+                    </div>
+                    <div class="mode-option" data-mode="local">
+                        <span class="mode-icon">🕹️</span>
+                        <span class="mode-label">本地双人</span>
+                    </div>
+                    <div class="mode-option" data-mode="ai">
+                        <span class="mode-icon">🤖</span>
+                        <span class="mode-label">AI 对战</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" id="btnConfirmCreate">✨ 开始游戏</button>
+                <button class="btn btn-secondary btn-small" id="btnBackHomeFromCreate">← 返回</button>
+            </div>
+        </div>
+
+        <!-- 加入（输入码） -->
+        <div class="screen" id="screenJoin">
+            <h3 style="font-size:20px;font-weight:600;margin-bottom:20px;">🍷 输入游戏码加入</h3>
+            <div class="form-group">
+                <label>你的昵称</label>
+                <input type="text" id="joinName" placeholder="输入昵称..." maxlength="12" />
+            </div>
+            <div class="form-group">
+                <label>游戏码</label>
+                <input type="text" id="joinCode" placeholder="输入 4 位游戏码" maxlength="4" style="letter-spacing:4px;font-weight:600;text-transform:uppercase;" />
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" id="btnConfirmJoin">🔮 加入</button>
+                <button class="btn btn-secondary btn-small" id="btnBackHomeFromJoin">← 返回</button>
+            </div>
+        </div>
+
+        <!-- 公共大厅 -->
+        <div class="screen" id="screenHall">
+            <div class="hall-header">
+                <h3>🌐 公共联机大厅</h3>
+                <div class="hall-controls">
+                    <button class="btn btn-secondary btn-small" id="btnRefreshHall">🔄 刷新</button>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#9988bb;cursor:pointer;">
+                        <input type="checkbox" id="autoRefreshHall" style="accent-color:#7b4dca;" />
+                        自动刷新(30s)
+                    </label>
+                    <button class="btn btn-secondary btn-small" id="btnBackHomeFromHall">← 返回</button>
+                </div>
+            </div>
+            <div class="room-list" id="roomList">
+                <div class="empty-hall">
+                    <div class="icon">🏚️</div>
+                    <div class="text">加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 等待中 -->
+        <div class="screen" id="screenWaiting">
+            <div class="text-center" style="padding:20px 0;">
+                <div style="font-size:56px;margin-bottom:16px;">🕯️</div>
+                <div style="font-size:20px;font-weight:600;margin-bottom:6px;">等待另一个灵魂...</div>
+                <div style="color:#9988bb;font-size:15px;" id="waitingInfo">请将游戏码分享给对手</div>
+                <div class="mt-16">
+                    <span class="waiting-spin">🌀</span>
+                </div>
+                <div class="mt-16">
+                    <button class="btn btn-danger btn-small" id="btnCancelWaiting">✕ 取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏主界面 -->
+        <div class="screen" id="screenGame">
+            <div class="game-info" id="gameInfo">
+                <div class="player-tag" id="player1Tag">
+                    <span class="dot"></span>
+                    <span id="player1Name">--</span>
+                    <span class="poison-status" id="player1PoisonStatus">⚗️ 待选</span>
+                </div>
+                <div class="turn-indicator" id="turnIndicator">⏳ 等待中</div>
+                <div class="player-tag" id="player2Tag">
+                    <span class="dot"></span>
+                    <span id="player2Name">--</span>
+                    <span class="poison-status" id="player2PoisonStatus">⚗️ 待选</span>
+                </div>
+            </div>
+            <div class="poison-hint" id="poisonHint">
+                ☠️ 点击一个表情包，选为你的 <strong>毒药</strong>（只有你可见），然后点击「确认毒药」
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px;">
+                <button class="btn btn-primary" id="btnConfirmPoison" style="display:none;">☠️ 确认毒药</button>
+                <button class="btn btn-secondary btn-small" id="btnLeaveGame" style="display:none;">🚪 离开</button>
+            </div>
+
+            <!-- 新增：游戏内打字聊天框 -->
+            <div class="chat-panel" id="gameChatPanel" style="display:none;">
+                <div class="chat-header">
+                    <span>💬 对局聊天</span>
+                    <span style="margin-left:auto;font-size:11px;color:#7766aa;" id="gameChatStatus">连接中...</span>
+                </div>
+                <div class="chat-messages" id="gameChatMessages"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="gameChatInput" placeholder="输入消息..." maxlength="100" />
+                    <button id="gameChatSend">发送</button>
+                </div>
+            </div>
+
+            <!-- 本地传递叠加层 -->
+            <div class="handoff-overlay" id="handoffOverlay" style="display:none;">
+                <div class="handoff-icon">🕹️</div>
+                <div class="handoff-title">请传递设备</div>
+                <div class="handoff-sub">轮到你了</div>
+                <div class="handoff-name" id="handoffPlayerName">玩家</div>
+                <button class="btn btn-primary" id="btnHandoffReady">✅ 我准备好了</button>
+            </div>
+        </div>
+
+        <!-- 结果 -->
+        <div class="screen" id="screenResult">
+            <div class="result-box">
+                <div class="big-icon" id="resultIcon">🏆</div>
+                <div class="result-title" id="resultTitle">--</div>
+                <div class="result-sub" id="resultSub">--</div>
+                <div class="poison-reveal" id="poisonReveal">
+                    <div class="reveal-item">
+                        <div class="emoji" id="revealP1Emoji">❓</div>
+                        <div class="name" id="revealP1Name">玩家1 的毒药</div>
+                    </div>
+                    <div class="reveal-item">
+                        <div class="emoji" id="revealP2Emoji">❓</div>
+                        <div class="name" id="revealP2Name">玩家2 的毒药</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+                    <button class="btn btn-primary" id="btnPlayAgain">🔄 再来一局</button>
+                    <button class="btn btn-secondary btn-small" id="btnBackHomeFromResult">🏠 首页</button>
+                </div>
+
+                <!-- 新增：结果页聊天（双方可继续对话） -->
+                <div class="result-chat" id="resultChatPanel" style="display:none;">
+                    <div class="chat-header">💬 赛后交流（离开本页后清空）</div>
+                    <div class="chat-messages" id="resultChatMessages" style="max-height:100px;overflow-y:auto;padding:8px 14px;"></div>
+                    <div class="chat-input-row">
+                        <input type="text" id="resultChatInput" placeholder="说点什么吧..." maxlength="100" />
+                        <button id="resultChatSend">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：公共聊天室页面 -->
+        <div class="screen" id="screenChatRoom">
+            <div class="chatroom-container">
+                <div class="chatroom-header">
+                    <div class="title">💬 公共聊天室 <span style="font-size:12px;color:#9988bb;font-weight:400;">· 闲聊 & 约战</span></div>
+                    <div class="online-count"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#6fcf97;box-shadow:0 0 6px #6fcf97;"></span> <span id="chatRoomOnline">1</span> 人在线</div>
+                </div>
+                <div class="chatroom-messages" id="chatRoomMessages"></div>
+                <div class="chatroom-input-row">
+                    <button class="btn-upload" id="btnUploadImage" title="上传图片">
+                        📷
+                        <input type="file" id="chatImageInput" accept="image/*" />
+                    </button>
+                    <input type="text" id="chatRoomInput" placeholder="输入消息，@某人 可提醒对方..." maxlength="200" />
+                    <button class="btn-challenge" id="btnChallenge" title="向当前对手发起约战">⚔️ 约战</button>
+                    <button class="btn-send" id="btnChatRoomSend">发送</button>
+                </div>
+                <!-- 图片预览区域 -->
+                <div class="chat-image-preview" id="chatImagePreview">
+                    <img id="chatPreviewImg" src="" alt="预览" />
+                    <div class="preview-info">
+                        <div id="chatPreviewName">image.png</div>
+                        <div style="color:#8877aa;font-size:11px;" id="chatPreviewSize">0 KB</div>
+                    </div>
+                    <button class="btn-cancel-img" id="btnCancelImage">取消</button>
+                    <button class="btn-send-img" id="btnSendImage">发送图片</button>
+                </div>
+                <!-- 图片全屏预览遮罩 -->
+                <div class="image-overlay" id="imageOverlay">
+                    <span class="overlay-close" id="overlayClose">&times;</span>
+                    <img id="overlayImg" src="" alt="全屏预览" />
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:12px;">
+                <button class="btn btn-secondary btn-small" id="btnBackHomeFromChat">← 返回首页</button>
+            </div>
+        </div>
+
+        <!-- 排行榜页面 -->
+        <div class="screen" id="screenLeaderboard">
+            <div class="leaderboard-container">
+                <h3 style="font-size:22px;font-weight:700;text-align:center;color:#dcc0ff;margin-bottom:8px;">🏆 排行榜</h3>
+                <p style="text-align:center;color:#9988bb;font-size:14px;margin-bottom:20px;">记录每一位女巫的辉煌与落败</p>
+
+                <div class="leaderboard-summary" id="leaderboardSummary"></div>
+
+                <div class="leaderboard-tabs">
+                    <div class="leaderboard-tab active" data-tab="win">🏆 胜利榜</div>
+                    <div class="leaderboard-tab" data-tab="lose">💀 失败榜</div>
+                    <div class="leaderboard-tab" data-tab="rate">⚡ 胜率榜</div>
+                </div>
+
+                <div class="leaderboard-panel active" id="panel-win">
+                    <div class="leaderboard-list" id="list-win"></div>
+                </div>
+                <div class="leaderboard-panel" id="panel-lose">
+                    <div class="leaderboard-list" id="list-lose"></div>
+                </div>
+                <div class="leaderboard-panel" id="panel-rate">
+                    <div class="leaderboard-list" id="list-rate"></div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:16px;">
+                <button class="btn btn-secondary btn-small" id="btnBackHomeFromLeaderboard">← 返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  🔊 语音系统（Web Speech API）—— 快速版：语速快、不滞后
+        // ================================================================
+        const Voice = (() => {
+            const synth = window.speechSynthesis;
+            let enabled = true;
+            let voice = null;
+            let initialized = false;
+            let speaking = false;
+            let queue = [];
+            let muted = false;
+            let abortController = null; // 用于中断上一段语音
+
+            function init() {
+                if (initialized || !synth) return;
+                initialized = true;
+
+                function pickVoice() {
+                    const voices = synth.getVoices();
+                    const zhVoices = voices.filter(v => v.lang.includes('zh') || v.lang.includes('CN'));
+                    const femaleKeywords = ['female', 'mei', 'lili', 'ya', 'xia', 'hui', 'ting', 'fang', 'na', 'woman', 'girl', 'yifei', 'huihui'];
+                    let chosen = zhVoices.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
+                    if (!chosen) chosen = zhVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft'));
+                    if (!chosen && zhVoices.length > 0) chosen = zhVoices[0];
+                    if (!chosen) chosen = voices.find(v => v.lang.includes('en')) || voices[0];
+                    voice = chosen || null;
+                }
+
+                if (synth.getVoices().length > 0) {
+                    pickVoice();
+                } else {
+                    synth.addEventListener('voiceschanged', pickVoice);
+                }
+
+                synth.onend = () => {
+                    speaking = false;
+                    processQueue();
+                };
+            }
+
+            function processQueue() {
+                if (speaking || queue.length === 0 || !enabled) return;
+                const next = queue.shift();
+                speaking = true;
+                // 中断上一段还没说完的
+                if (synth.speaking) synth.cancel();
+                const utter = new SpeechSynthesisUtterance(next.text);
+                if (voice) utter.voice = voice;
+                utter.lang = 'zh-CN';
+                utter.rate = next.rate;
+                utter.pitch = next.pitch;
+                utter.volume = next.volume;
+                // 超时保护：最长2秒强制结束，防止卡住队列
+                abortController = setTimeout(() => {
+                    if (synth.speaking) synth.cancel();
+                }, 2000);
+                utter.onend = () => {
+                    if (abortController) { clearTimeout(abortController); abortController = null; }
+                    speaking = false;
+                    processQueue();
+                };
+                utter.onerror = () => {
+                    if (abortController) { clearTimeout(abortController); abortController = null; }
+                    speaking = false;
+                    processQueue();
+                };
+                synth.speak(utter);
+            }
+
+            function speak(text, opts = {}) {
+                if (!enabled || !synth || muted) return;
+                init();
+                // 快速语速：基准1.6，情绪微调幅度极小
+                const rate = opts.rate || 1.6;
+                const pitch = opts.pitch || 1.2;
+                const volume = opts.volume || 0.95;
+                let finalRate = rate;
+                let finalPitch = pitch;
+                if (opts.emotion === 'evil') {
+                    finalPitch = 1.1;
+                    finalRate = 1.5;
+                } else if (opts.emotion === 'excited') {
+                    finalPitch = 1.3;
+                    finalRate = 1.7;
+                } else if (opts.emotion === 'sad') {
+                    finalPitch = 1.15;
+                    finalRate = 1.5;
+                } else if (opts.emotion === 'thinking') {
+                    finalPitch = 1.2;
+                    finalRate = 1.6;
+                }
+                // 新语音进来，清掉旧队列，保证只说最新的
+                queue = [];
+                if (synth.speaking) synth.cancel();
+                queue.push({ text, rate: finalRate, pitch: finalPitch, volume });
+                speaking = false;
+                processQueue();
+            }
+
+            function setEnabled(val) {
+                enabled = val;
+                if (!enabled && synth) {
+                    synth.cancel();
+                    queue = [];
+                    speaking = false;
+                }
+            }
+
+            function isEnabled() {
+                return enabled;
+            }
+
+            // 等待当前语音说完（用于同步AI行动）
+            function waitUntilDone() {
+                return new Promise(resolve => {
+                    if (!synth || !synth.speaking) { resolve(); return; }
+                    const check = () => {
+                        if (!synth.speaking) resolve();
+                        else setTimeout(check, 50);
+                    };
+                    check();
+                });
+            }
+
+            return { speak, setEnabled, isEnabled, init, waitUntilDone };
+        })();
+
+        // ================================================================
+        //  工具
+        // ================================================================
+        const $ = id => document.getElementById(id);
+        const delay = ms => new Promise(r => setTimeout(r, ms));
+
+        function toast(msg, duration = 3000) {
+            const el = $('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(el._timer);
+            el._timer = setTimeout(() => el.classList.remove('show'), duration);
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            $(id).classList.add('active');
+        }
+
+        function setStatus(msg, type) {
+            const el = $('statusBar');
+            el.innerHTML = msg;
+        }
+
+        function generateCode() {
+            return String(Math.floor(1000 + Math.random() * 9000));
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 扩充到60个，全部围绕毒药/魔法/神秘主题
+        const EMOJI_POOL = [
+            // 经典表情（10）
+            '😀', '😂', '🤣', '😊', '😎', '🤩', '😍', '🥰', '😜', '🤪',
+            // 暗黑/魔幻（10）
+            '😈', '👻', '🎃', '🤖', '👽', '💩', '🦊', '🐱', '🐶', '🐼',
+            // 神话生物（10）
+            '🦄', '🐉', '🦋', '🐙', '🕷️', '🦂', '🐍', '🦇', '🦅', '🦁',
+            // 魔法/毒药道具（10）
+            '🍄', '🌙', '⭐', '🔥', '💎', '🎯', '⚗️', '🔮', '🧪', '💊',
+            // 卡牌/赌博/运气（10）
+            '🍀', '♠️', '♥️', '♣️', '♦️', '🃏', '🎲', '🧩', '🎭', '🎪',
+            // 额外毒药/恐怖主题（10）
+            '☠️', '💀', '🩸', '🪦', '⚰️', '🕯️', '🔪', '🏺', '🧿', '📖'
+        ];
+
+        function pickEmojis(count) {
+            const pool = [...EMOJI_POOL];
+            shuffleArray(pool);
+            return pool.slice(0, count);
+        }
+
+        // ================================================================
+        //  数据库（兼容模式：优先使用 localStorage，支持联机）
+        // ================================================================
+        const fakeDb = (() => {
+            const store = {};
+            return {
+                async add(collection, data) {
+                    if (!store[collection]) store[collection] = [];
+                    const id = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                    const record = { id, data: { ...data }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                    store[collection].push(record);
+                    return record;
+                },
+                async list(collection, { limit = 50 } = {}) {
+                    const items = (store[collection] || []).slice(-limit).reverse();
+                    return { items };
+                },
+                async get(collection, id) {
+                    const items = store[collection] || [];
+                    const found = items.find(r => r.id === id);
+                    return found || null;
+                },
+                async set(collection, id, data) {
+                    if (!store[collection]) store[collection] = [];
+                    let existing = store[collection].find(r => r.id === id);
+                    if (existing) {
+                        existing.data = { ...data };
+                        existing.updatedAt = new Date().toISOString();
+                    } else {
+                        existing = { id, data: { ...data }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                        store[collection].push(existing);
+                    }
+                    return existing;
+                },
+                async remove(collection, id) {
+                    if (!store[collection]) return;
+                    store[collection] = store[collection].filter(r => r.id !== id);
+                },
+                async increment(collection, id, field, val) {
+                    const existing = await this.get(collection, id);
+                    if (existing) {
+                        existing.data[field] = (existing.data[field] || 0) + val;
+                        existing.updatedAt = new Date().toISOString();
+                    }
+                    return existing;
+                }
+            };
+        })();
+
+        // 尝试使用 localStorage 持久化（让刷新页面后数据不丢）
+        const persistentDb = (() => {
+            const PREFIX = 'witch_poison_';
+            return {
+                async add(collection, data) {
+                    return fakeDb.add(collection, data);
+                },
+                async list(collection, { limit = 50 } = {}) {
+                    try {
+                        const items = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && key.startsWith(PREFIX + collection + '_')) {
+                                const val = JSON.parse(localStorage.getItem(key));
+                                items.push(val);
+                            }
+                        }
+                        // 也包含内存中的
+                        const memResult = await fakeDb.list(collection, { limit });
+                        memResult.items.forEach(item => {
+                            if (!items.find(i => i.id === item.id)) items.push(item);
+                        });
+                        items.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+                        return { items: items.slice(0, limit) };
+                    } catch (e) {
+                        return fakeDb.list(collection, { limit });
+                    }
+                },
+                async get(collection, id) {
+                    try {
+                        const key = PREFIX + collection + '_' + id;
+                        const stored = localStorage.getItem(key);
+                        if (stored) return JSON.parse(stored);
+                    } catch (e) {}
+                    return fakeDb.get(collection, id);
+                },
+                async set(collection, id, data) {
+                    const result = await fakeDb.set(collection, id, data);
+                    try {
+                        const key = PREFIX + collection + '_' + id;
+                        localStorage.setItem(key, JSON.stringify(result));
+                    } catch (e) {}
+                    return result;
+                },
+                async remove(collection, id) {
+                    try {
+                        const key = PREFIX + collection + '_' + id;
+                        localStorage.removeItem(key);
+                    } catch (e) {}
+                    return fakeDb.remove(collection, id);
+                },
+                async increment(collection, id, field, val) {
+                    return fakeDb.increment(collection, id, field, val);
+                }
+            };
+        })();
+
+        const dataApi = persistentDb;
+
+        // ================================================================
+        //  游戏状态
+        // ================================================================
+        const G = {
+            myPlayerId: null,
+            myName: '',
+            gameId: null,
+            emojiCount: 9,
+            emojis: [],
+            data: null,
+            myPoison: null,
+            confirmed: false,
+            pollingTimer: null,
+            pollingInterval: 1200,
+            lastVersion: 0,
+            busy: false,
+            mode: 'online-public',
+            isAI: false,
+            isLocal: false,
+            localData: null,
+            localPhase: null,
+            localTurn: null,
+            aiExecuting: false,
+            aiThinkTimer: null,
+        };
+
+        // ================================================================
+        //  数据库操作
+        // ================================================================
+        async function apiCreateGame({ name, emojiCount, isPublic }) {
+            const code = generateCode();
+            const emojis = pickEmojis(emojiCount);
+            const gameData = {
+                code,
+                emojis,
+                emojiCount,
+                player1: { name, poison: null, ready: false },
+                player2: { name: null, poison: null, ready: false },
+                status: 'waiting',
+                currentTurn: 'player1',
+                selected: [],
+                winner: null,
+                loser: null,
+                turnCount: 0,
+                version: 1,
+                createdAt: Date.now(),
+                public: isPublic ? true : false,
+            };
+            await dataApi.set('witch_poison_games', code, gameData);
+            return { code, gameData };
+        }
+
+        async function apiGetGame(code) {
+            const record = await dataApi.get('witch_poison_games', code);
+            return record ? record.data : null;
+        }
+
+        async function apiUpdateGame(code, updates) {
+            const record = await dataApi.get('witch_poison_games', code);
+            if (!record) throw new Error('游戏不存在');
+            const data = { ...record.data, ...updates, version: (record.data.version || 0) + 1 };
+            await dataApi.set('witch_poison_games', code, data);
+            return data;
+        }
+
+        async function apiDeleteGame(code) {
+            await dataApi.remove('witch_poison_games', code);
+        }
+
+        async function apiListGames() {
+            const result = await dataApi.list('witch_poison_games', { limit: 50 });
+            return result.items.map(item => item.data);
+        }
+
+        // ================================================================
+        //  游戏逻辑 (通用)
+        // ================================================================
+        function isPlayer1() {
+            return G.myPlayerId === 'player1';
+        }
+
+        function getMe() {
+            if (G.isLocal) {
+                return G.localData.currentTurn === 'player1' ? G.localData.player1 : G.localData.player2;
+            }
+            return G.data ? G.data[G.myPlayerId] : null;
+        }
+
+        function getOpponent() {
+            if (G.isLocal) {
+                return G.localData.currentTurn === 'player1' ? G.localData.player2 : G.localData.player1;
+            }
+            const opp = isPlayer1() ? 'player2' : 'player1';
+            return G.data ? G.data[opp] : null;
+        }
+
+        function getOpponentId() {
+            if (G.isLocal) {
+                return G.localData.currentTurn === 'player1' ? 'player2' : 'player1';
+            }
+            return isPlayer1() ? 'player2' : 'player1';
+        }
+
+        function isMyTurn() {
+            if (G.isLocal) {
+                if (G.localData.status !== 'playing') return false;
+                return G.localData.currentTurn === G.myPlayerId;
+            }
+            if (!G.data || G.data.status !== 'playing') return false;
+            return G.data.currentTurn === G.myPlayerId;
+        }
+
+        function isMyPoisonReady() {
+            if (G.isLocal) {
+                return G.localData[G.myPlayerId] && G.localData[G.myPlayerId].ready === true;
+            }
+            if (!G.data) return false;
+            return G.data[G.myPlayerId] && G.data[G.myPlayerId].ready === true;
+        }
+
+        function getMyPoisonIndex() {
+            if (G.isLocal) {
+                return G.localData[G.myPlayerId].poison;
+            }
+            if (!G.data) return null;
+            return G.data[G.myPlayerId].poison;
+        }
+
+        function getOpponentPoisonIndex() {
+            if (G.isLocal) {
+                const opp = G.localData.currentTurn === 'player1' ? 'player2' : 'player1';
+                return G.localData[opp].poison;
+            }
+            const opp = getOpponentId();
+            return G.data ? G.data[opp].poison : null;
+        }
+
+        // ================================================================
+        //  AI 逻辑 (含语音)
+        // ================================================================
+        const AI_SAYINGS = {
+            choosePoison: [
+                '就选这个！',
+                '嘿嘿，藏好了！',
+                '这个最安全，其实最毒！',
+                '你绝对猜不到～',
+                '搞定，看你怎么找！'
+            ],
+            move: [
+                '选这个！',
+                '就点它！',
+                '嗯，这边！',
+                '你以为我会选那边吗？',
+                '凭直觉，就它！',
+                '看穿你了，选这！',
+                '赌一把，点！',
+                '这个没问题！',
+                '我知道你在想什么！'
+            ],
+            win: [
+                '哈哈我赢了！',
+                '太轻松了！',
+                '你中招啦！',
+                '服不服？',
+                '下次加油哦！'
+            ],
+            lose: [
+                '哎呀栽了！',
+                '算你走运！',
+                '下次我一定赢！',
+                '你运气真好！',
+                '我记住你了！'
+            ],
+            start: [
+                '来吧，开始！',
+                '看谁更厉害！',
+                '准备好了吗？',
+                '让你见识一下！',
+                '月圆之夜，下毒！'
+            ],
+            thinking: [
+                '嗯…选这！',
+                '就它了！',
+                '感觉这边！',
+                '差不多了！',
+                '行，就这个！'
+            ],
+            chatWin: [
+                '服不服？再来！',
+                '惹怒女巫的下场！',
+                '教你几招？哈哈！',
+                '祖传配方哦～'
+            ],
+            chatLose: [
+                '下次没这么走运！',
+                '我大意了，再来！',
+                '你肯定作弊了！',
+                '等我出新毒药！'
+            ]
+        };
+
+        function randomSaying(category) {
+            const arr = AI_SAYINGS[category] || ['...'];
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // AI 语音说话（带文本显示）—— 快速版
+        function aiSpeak(text, emotion = 'normal') {
+            toast('🤖 AI女巫: ' + text, 1500);
+            Voice.speak(text, { emotion });
+        }
+
+        // 等AI说完话再继续（防止说话滞后于动作）
+        async function aiSpeakAndWait(text, emotion = 'normal') {
+            toast('🤖 AI女巫: ' + text, 1500);
+            Voice.speak(text, { emotion });
+            await Voice.waitUntilDone();
+        }
+
+        function aiChoosePoison() {
+            const total = G.emojis.length;
+            if (total === 0) return null;
+            const center = Math.floor(total / 2);
+            const indices = Array.from({ length: total }, (_, i) => i);
+            const sorted = indices.sort((a, b) => Math.abs(a - center) - Math.abs(b - center));
+            const chosen = sorted[Math.floor(Math.random() * Math.min(3, sorted.length))];
+            const saying = randomSaying('choosePoison');
+            // 立即说，不延迟
+            aiSpeak(saying, 'evil');
+            return chosen;
+        }
+
+        function aiChooseMove() {
+            const data = G.data;
+            if (!data) return null;
+            const selected = data.selected || [];
+            const aiPlayerId = getOpponentId();
+            const aiPoisonIdx = data[aiPlayerId] ? data[aiPlayerId].poison : null;
+            const total = G.emojis.length;
+            const available = [];
+            for (let i = 0; i < total; i++) {
+                if (!selected.includes(i) && i !== aiPoisonIdx) {
+                    available.push(i);
+                }
+            }
+            if (available.length === 0) {
+                for (let i = 0; i < total; i++) {
+                    if (!selected.includes(i)) return i;
+                }
+                return null;
+            }
+            const lastMove = selected.length > 0 ? selected[selected.length - 1] : -1;
+            const center = Math.floor(total / 2);
+            available.sort((a, b) => {
+                const distA = Math.abs(a - center);
+                const distB = Math.abs(b - center);
+                const lastDistA = lastMove !== -1 ? Math.abs(a - lastMove) : 0;
+                const lastDistB = lastMove !== -1 ? Math.abs(b - lastMove) : 0;
+                return (lastDistB - lastDistA) + (distA - distB);
+            });
+            const chosen = available[Math.floor(Math.random() * Math.min(3, available.length))];
+
+            // AI 立即说话，不延迟
+            const saying = randomSaying('move');
+            aiSpeak(saying, 'thinking');
+
+            return chosen;
+        }
+
+        async function executeAITurn() {
+            if (G.aiExecuting || !G.isAI) return;
+            const data = G.data;
+            if (!data || data.status !== 'playing') return;
+            const aiPlayerId = getOpponentId();
+            if (data.currentTurn !== aiPlayerId) return;
+
+            G.aiExecuting = true;
+
+            // 缩短思考延迟，说完再行动
+            const thinkText = randomSaying('thinking');
+            aiSpeak(thinkText, 'thinking');
+            // 等语音说完或最多等1.2秒
+            await Promise.race([Voice.waitUntilDone(), delay(1200)]);
+
+            try {
+                const idx = aiChooseMove();
+                if (idx === null) { G.aiExecuting = false; return; }
+
+                const oppId = isPlayer1() ? 'player1' : 'player2';
+                const oppPoison = data[oppId].poison;
+                const myPoison = data[aiPlayerId].poison;
+
+                if (idx === oppPoison || (myPoison !== null && idx === myPoison)) {
+                    const loser = aiPlayerId;
+                    const winner = oppId;
+                    const newData = await apiUpdateGame(G.gameId, {
+                        selected: [...data.selected, idx],
+                        currentTurn: null,
+                        status: 'finished',
+                        winner,
+                        loser,
+                        turnCount: data.turnCount + 1,
+                    });
+                    G.data = newData;
+                    await syncGame();
+                    const loseText = randomSaying('lose');
+                    aiSpeak(loseText, 'sad');
+                    G.aiExecuting = false;
+                    return;
+                }
+
+                const nextTurn = oppId;
+                const newData = await apiUpdateGame(G.gameId, {
+                    selected: [...data.selected, idx],
+                    currentTurn: nextTurn,
+                    turnCount: data.turnCount + 1,
+                });
+                G.data = newData;
+                await syncGame();
+            } catch (err) {
+                console.error(err);
+                aiSpeak('出错了，让我重新想想', 'sad');
+            } finally {
+                G.aiExecuting = false;
+            }
+        }
+
+        // ================================================================
+        //  本地双人逻辑
+        // ================================================================
+        function startLocalGame(p1Name, p2Name, emojiCount) {
+            const emojis = pickEmojis(emojiCount);
+            G.mode = 'local';
+            G.isLocal = true;
+            G.isAI = false;
+            G.emojis = emojis;
+            G.emojiCount = emojiCount;
+            G.localData = {
+                player1: { name: p1Name, poison: null, ready: false },
+                player2: { name: p2Name, poison: null, ready: false },
+                emojis: emojis,
+                status: 'choosing',
+                currentTurn: null,
+                selected: [],
+                winner: null,
+                loser: null,
+                turnCount: 0,
+            };
+            G.localPhase = 'p1-choose';
+            G.myPlayerId = 'player1';
+            showScreen('screenGame');
+            renderLocalGame();
+            toast(`🎯 ${p1Name}，请选择你的毒药`);
+        }
+
+        function renderLocalGame() {
+            const data = G.localData;
+            if (!data) return;
+
+            const p1 = data.player1;
+            const p2 = data.player2;
+
+            $('player1Name').textContent = p1.name || '玩家1';
+            $('player2Name').textContent = p2.name || '玩家2';
+
+            const p1Status = $('player1PoisonStatus');
+            const p2Status = $('player2PoisonStatus');
+            p1Status.textContent = p1.ready ? '☠️ 已选毒药' : '⚗️ 待选';
+            p1Status.className = 'poison-status' + (p1.ready ? ' ready' : '');
+            p2Status.textContent = p2.ready ? '☠️ 已选毒药' : '⚗️ 待选';
+            p2Status.className = 'poison-status' + (p2.ready ? ' ready' : '');
+
+            const turnEl = $('turnIndicator');
+            if (data.status === 'choosing') {
+                if (G.localPhase === 'p1-choose') {
+                    turnEl.textContent = `🧪 ${p1.name} 选择毒药`;
+                } else {
+                    turnEl.textContent = `🧪 ${p2.name} 选择毒药`;
+                }
+            } else if (data.status === 'playing') {
+                const who = data.currentTurn === 'player1' ? p1.name : p2.name;
+                const isMe = data.currentTurn === G.myPlayerId;
+                turnEl.textContent = isMe ? `✨ ${who} 的回合` : `⏳ ${who} 的回合`;
+            } else if (data.status === 'finished') {
+                turnEl.textContent = '🏁 游戏已结束';
+            }
+
+            const p1Tag = $('player1Tag');
+            const p2Tag = $('player2Tag');
+            p1Tag.classList.toggle('active-turn', data.currentTurn === 'player1' && data.status === 'playing');
+            p2Tag.classList.toggle('active-turn', data.currentTurn === 'player2' && data.status === 'playing');
+
+            const badge = p2Tag.querySelector('.ai-badge');
+            if (badge) badge.remove();
+
+            renderLocalEmojiGrid();
+            renderLocalPoisonHint();
+            renderLocalConfirmButton();
+            renderLocalHandoff();
+            renderLocalStatusBar();
+            $('gameCodeBadge').style.display = 'none';
+        }
+
+        function renderLocalEmojiGrid() {
+            const grid = $('emojiGrid');
+            const data = G.localData;
+            const emojis = G.emojis;
+            if (!data || emojis.length === 0) {
+                grid.innerHTML = `<div class="empty-state"><div class="icon">🎴</div><div class="text">等待加载...</div></div>`;
+                return;
+            }
+
+            const selected = data.selected || [];
+            const isPlaying = data.status === 'playing';
+            const isChoosing = data.status === 'choosing';
+            const isFinished = data.status === 'finished';
+
+            let currentPlayerId = null;
+            let currentPlayerReady = false;
+            let isSelectedIdx = null;
+
+            if (isChoosing) {
+                currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                currentPlayerReady = data[currentPlayerId].ready;
+                if (!currentPlayerReady && data[currentPlayerId].poison !== null) {
+                    isSelectedIdx = data[currentPlayerId].poison;
+                }
+            } else if (isPlaying) {
+                currentPlayerId = data.currentTurn;
+                currentPlayerReady = data[currentPlayerId].ready;
+            }
+
+            const isMyTurnLocal = isPlaying && data.currentTurn === G.myPlayerId;
+            const isChoosingLocal = isChoosing && G.localPhase === (G.myPlayerId === 'player1' ? 'p1-choose' : 'p2-choose');
+            const isBusy = G.busy === true;
+
+            let html = '';
+            emojis.forEach((emoji, idx) => {
+                const isUsed = selected.includes(idx);
+                const isSelected = (isSelectedIdx === idx && idx !== null);
+                let canClick = false;
+                if (!isBusy) {
+                    if (isChoosing && isChoosingLocal && !currentPlayerReady) canClick = true;
+                    else if (isPlaying && isMyTurnLocal && !isUsed) canClick = true;
+                }
+                let cls = 'emoji-card';
+                if (isUsed) cls += ' used';
+                if (isSelected) cls += ' selected';
+                if (!canClick) cls += ' disabled';
+                const label = isUsed ? '⚔️' : '';
+                html += `<div class="${cls}" data-index="${idx}" data-emoji="${emoji}">
+                            ${emoji}
+                            ${label ? `<span class="card-label">${label}</span>` : ''}
+                        </div>`;
+            });
+            grid.innerHTML = html;
+            grid.querySelectorAll('.emoji-card:not(.disabled)').forEach(el => {
+                el.addEventListener('click', onLocalEmojiClick);
+            });
+        }
+
+        function renderLocalPoisonHint() {
+            const hint = $('poisonHint');
+            const data = G.localData;
+            if (!data) { hint.style.display = 'none'; return; }
+            if (data.status === 'choosing') {
+                const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                const ready = data[currentPlayerId].ready;
+                if (ready) {
+                    hint.innerHTML = '✅ 你已确认毒药，等待对方选择...';
+                    hint.style.background = 'rgba(111,207,151,0.06)';
+                    hint.style.borderColor = 'rgba(111,207,151,0.15)';
+                    hint.style.color = '#aaddbb';
+                } else {
+                    hint.innerHTML = '☠️ 点击一个表情包，选为你的 <strong>毒药</strong>，然后点击「确认毒药」';
+                    hint.style.background = 'rgba(200,40,80,0.06)';
+                    hint.style.borderColor = 'rgba(200,40,80,0.15)';
+                    hint.style.color = '#cc99bb';
+                }
+                hint.style.display = 'block';
+            } else if (data.status === 'playing') {
+                const who = data.currentTurn === 'player1' ? data.player1.name : data.player2.name;
+                const isMe = data.currentTurn === G.myPlayerId;
+                if (isMe) {
+                    hint.innerHTML = `🎯 ${who}，选择一个表情包，小心别碰到毒药！`;
+                } else {
+                    hint.innerHTML = `⏳ 等待 ${who} 选择...`;
+                }
+                hint.style.display = 'block';
+                hint.style.background = 'rgba(160,100,255,0.06)';
+                hint.style.borderColor = 'rgba(160,100,255,0.1)';
+                hint.style.color = '#bbaaee';
+            } else if (data.status === 'finished') {
+                hint.style.display = 'none';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        function renderLocalConfirmButton() {
+            const btn = $('btnConfirmPoison');
+            const data = G.localData;
+            if (!data) { btn.style.display = 'none'; return; }
+            if (data.status === 'choosing') {
+                const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                const ready = data[currentPlayerId].ready;
+                const poison = data[currentPlayerId].poison;
+                if (!ready && poison !== null && !G.busy) {
+                    btn.style.display = 'inline-flex';
+                    btn.textContent = '☠️ 确认毒药';
+                    return;
+                }
+            }
+            btn.style.display = 'none';
+        }
+
+        function renderLocalHandoff() {
+            const overlay = $('handoffOverlay');
+            if (G.busy) { overlay.style.display = 'none'; return; }
+            const data = G.localData;
+            if (!data) { overlay.style.display = 'none'; return; }
+            if (data.status === 'choosing') {
+                const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                const ready = data[currentPlayerId].ready;
+                if (ready) {
+                    const nextPlayerId = currentPlayerId === 'player1' ? 'player2' : 'player1';
+                    const nextPlayerName = data[nextPlayerId].name;
+                    if (data[nextPlayerId].ready) { overlay.style.display = 'none'; return; }
+                    overlay.style.display = 'flex';
+                    $('handoffPlayerName').textContent = nextPlayerName;
+                    $('handoffOverlay').querySelector('.handoff-sub').textContent = '请将设备交给对方';
+                    $('handoffOverlay').querySelector('.handoff-icon').textContent = '🕹️';
+                    $('btnHandoffReady').dataset.targetPhase = nextPlayerId === 'player1' ? 'p1-choose' : 'p2-choose';
+                    return;
+                }
+            }
+            if (data.status === 'playing') {
+                if (data.currentTurn !== G.myPlayerId) {
+                    const nextPlayerName = data[data.currentTurn].name;
+                    overlay.style.display = 'flex';
+                    $('handoffPlayerName').textContent = nextPlayerName;
+                    $('handoffOverlay').querySelector('.handoff-sub').textContent = '请将设备交给对方';
+                    $('handoffOverlay').querySelector('.handoff-icon').textContent = '🕹️';
+                    $('btnHandoffReady').dataset.targetPhase = 'playing';
+                    return;
+                }
+            }
+            overlay.style.display = 'none';
+        }
+
+        function renderLocalStatusBar() {
+            const data = G.localData;
+            if (!data) { setStatus('🌙 欢迎来到女巫的毒药游戏'); return; }
+            const p1 = data.player1;
+            const p2 = data.player2;
+            if (data.status === 'choosing') {
+                const who = G.localPhase === 'p1-choose' ? p1.name : p2.name;
+                setStatus(`🧪 选择毒药阶段 · 当前：<strong>${who}</strong>`);
+            } else if (data.status === 'playing') {
+                const who = data.currentTurn === 'player1' ? p1.name : p2.name;
+                setStatus(`✨ 当前回合：<strong>${who}</strong> · 已选 ${data.selected.length}/${G.emojis.length}`);
+            } else if (data.status === 'finished') {
+                const winner = data.winner === 'player1' ? p1.name : p2.name;
+                setStatus(`🏁 游戏结束 · <strong>${winner}</strong> 获胜！`);
+            } else {
+                setStatus('🌙 女巫的毒药');
+            }
+        }
+
+        async function onLocalEmojiClick(e) {
+            const card = e.currentTarget;
+            const idx = parseInt(card.dataset.index);
+            const data = G.localData;
+            if (!data || G.busy) return;
+            G.busy = true;
+            try {
+                if (data.status === 'choosing') {
+                    const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                    if (data[currentPlayerId].ready) { toast('你已经确认了毒药'); G.busy = false; return; }
+                    data[currentPlayerId].poison = idx;
+                    G.myPlayerId = currentPlayerId;
+                    G.myPoison = idx;
+                    G.busy = false;
+                    renderLocalGame();
+                    toast('已选择毒药，点击「确认毒药」提交');
+                } else if (data.status === 'playing' && data.currentTurn === G.myPlayerId) {
+                    await handleLocalPlaySelect(idx);
+                    G.busy = false;
+                } else {
+                    G.busy = false;
+                }
+            } catch (err) {
+                console.error(err);
+                toast('操作失败：' + err.message);
+                G.busy = false;
+            }
+        }
+
+        async function handleLocalPlaySelect(idx) {
+            if (G._localTimeout) { clearTimeout(G._localTimeout); G._localTimeout = null; }
+            const data = G.localData;
+            if (!data || data.status !== 'playing' || data.currentTurn !== G.myPlayerId) return;
+            if (data.selected.includes(idx)) { toast('这个表情包已经被选过了'); return; }
+            const currentPlayerId = data.currentTurn;
+            const oppId = currentPlayerId === 'player1' ? 'player2' : 'player1';
+            const oppPoison = data[oppId].poison;
+            const myPoison = data[currentPlayerId].poison;
+            if (idx === oppPoison || (myPoison !== null && idx === myPoison)) {
+                data.status = 'finished';
+                data.winner = oppId;
+                data.loser = currentPlayerId;
+                data.selected.push(idx);
+                data.turnCount++;
+                renderLocalGame();
+                toast('💀 你触碰了毒药！');
+                return;
+            }
+            G.busy = true;
+            data.selected.push(idx);
+            renderLocalGame();
+            toast('✅ 安全，切换到对手...');
+            setStatus('⏳ 准备切换...');
+            const delayTime = 1200 + Math.random() * 800;
+            G._localTimeout = setTimeout(() => {
+                data.currentTurn = oppId;
+                G.myPlayerId = oppId;
+                data.turnCount++;
+                G.busy = false;
+                renderLocalGame();
+                toast('请将设备交给对方');
+            }, delayTime);
+        }
+
+        function confirmLocalPoison() {
+            const data = G.localData;
+            if (!data || data.status !== 'choosing') { toast('当前不是选择毒药阶段'); return; }
+            const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+            if (data[currentPlayerId].ready) { toast('你已经确认过毒药了'); return; }
+            if (data[currentPlayerId].poison === null) { toast('请先选择一个表情包作为毒药'); return; }
+            data[currentPlayerId].ready = true;
+            G.myPoison = null;
+            G.busy = true;
+            toast('☠️ 毒药已确认');
+            setStatus('⏳ 准备中...');
+            const delayTime = 600 + Math.random() * 400;
+            G._localTimeout = setTimeout(() => {
+                G.busy = false;
+                if (data.player1.ready && data.player2.ready) {
+                    data.status = 'playing';
+                    data.currentTurn = Math.random() < 0.5 ? 'player1' : 'player2';
+                    G.myPlayerId = data.currentTurn;
+                    G.localPhase = 'playing';
+                    renderLocalGame();
+                    toast(`🔮 游戏开始！${data[data.currentTurn].name} 先手`);
+                } else {
+                    if (G.localPhase === 'p1-choose') {
+                        G.localPhase = 'p2-choose';
+                        G.myPlayerId = 'player2';
+                    } else {
+                        G.localPhase = 'p1-choose';
+                        G.myPlayerId = 'player1';
+                    }
+                    renderLocalGame();
+                    toast('请将设备交给对方');
+                }
+            }, delayTime);
+        }
+
+        function handleLocalHandoffReady() {
+            const overlay = $('handoffOverlay');
+            overlay.style.display = 'none';
+            const data = G.localData;
+            if (!data) return;
+            if (data.status === 'choosing') {
+                renderLocalGame();
+                const currentPlayerId = G.localPhase === 'p1-choose' ? 'player1' : 'player2';
+                toast(`🎯 ${data[currentPlayerId].name}，请选择你的毒药`);
+            } else if (data.status === 'playing') {
+                renderLocalGame();
+                const who = data.currentTurn === 'player1' ? data.player1.name : data.player2.name;
+                toast(`🎯 ${who}，轮到你了`);
+            }
+        }
+
+        // ================================================================
+        //  UI 渲染 (通用)
+        // ================================================================
+        function renderAll() {
+            if (G.isLocal) { renderLocalGame(); return; }
+            renderEmojiGrid();
+            renderPlayerInfo();
+            renderPoisonHint();
+            renderConfirmButton();
+            renderLeaveButton();
+            renderStatusBar();
+            renderGameCodeBadge();
+            // 新增：游戏内聊天
+            const gcp = $('gameChatPanel');
+            if (gcp) {
+                if (G.gameId && (G.data?.status === 'playing' || G.data?.status === 'choosing' || G.data?.status === 'finished')) {
+                    gcp.style.display = 'flex';
+                    renderGameChat();
+                    startGameChatPolling();
+                    // 语音聊天按钮可用
+                    const vcb = $('voiceChatBtn');
+                    if (vcb) vcb.classList.remove('disabled');
+                } else {
+                    gcp.style.display = 'none';
+                }
+            }
+        }
+
+        function renderEmojiGrid() {
+            const grid = $('emojiGrid');
+            const emojis = G.emojis || [];
+            const data = G.data;
+            if (!data || emojis.length === 0) {
+                grid.innerHTML = `<div class="empty-state"><div class="icon">🎴</div><div class="text">等待加载...</div></div>`;
+                return;
+            }
+            const selected = data.selected || [];
+            const myPoisonIdx = getMyPoisonIndex();
+            const oppPoisonIdx = getOpponentPoisonIndex();
+            const isPlaying = data.status === 'playing';
+            const isFinished = data.status === 'finished';
+            const isChoosing = data.status === 'choosing';
+            const myTurn = isMyTurn();
+            const myReady = isMyPoisonReady();
+
+            let html = '';
+            emojis.forEach((emoji, idx) => {
+                const isUsed = selected.includes(idx);
+                const isMyPoison = myPoisonIdx === idx && myPoisonIdx !== null;
+                const isOppPoison = oppPoisonIdx === idx && oppPoisonIdx !== null;
+                const canClick = !isUsed && !isFinished;
+                let cls = 'emoji-card';
+                if (isUsed) cls += ' used';
+                if (isMyPoison && !isFinished) cls += ' poison-self';
+                if (isOppPoison && isFinished) cls += ' opponent-poison';
+                if (!canClick && !isFinished) cls += ' disabled';
+                if (isChoosing && myReady) cls += ' disabled';
+                if (isPlaying && !myTurn) cls += ' disabled';
+                if (isPlaying && myTurn && isUsed) cls += ' disabled';
+                const label = isUsed ? '⚔️' : '';
+                html += `<div class="${cls}" data-index="${idx}" data-emoji="${emoji}">
+                            ${emoji}
+                            ${label ? `<span class="card-label">${label}</span>` : ''}
+                        </div>`;
+            });
+            grid.innerHTML = html;
+            grid.querySelectorAll('.emoji-card:not(.disabled):not(.used)').forEach(el => {
+                el.addEventListener('click', onEmojiClick);
+            });
+        }
+
+        function renderPlayerInfo() {
+            const data = G.data;
+            if (!data) return;
+            const p1 = data.player1;
+            const p2 = data.player2;
+            $('player1Name').textContent = p1.name || '玩家1';
+            $('player2Name').textContent = p2.name || '玩家2';
+            const p1Status = $('player1PoisonStatus');
+            const p2Status = $('player2PoisonStatus');
+            p1Status.textContent = p1.ready ? '☠️ 已选毒药' : '⚗️ 待选';
+            p1Status.className = 'poison-status' + (p1.ready ? ' ready' : '');
+            p2Status.textContent = p2.ready ? '☠️ 已选毒药' : '⚗️ 待选';
+            p2Status.className = 'poison-status' + (p2.ready ? ' ready' : '');
+            const turnEl = $('turnIndicator');
+            if (data.status === 'choosing') {
+                turnEl.textContent = '🧪 选择毒药阶段';
+            } else if (data.status === 'waiting') {
+                turnEl.textContent = '⏳ 等待对手加入...';
+            } else if (data.status === 'playing') {
+                const who = data.currentTurn === 'player1' ? (p1.name || '玩家1') : (p2.name || '玩家2');
+                const isMe = data.currentTurn === G.myPlayerId;
+                turnEl.textContent = isMe ? '✨ 你的回合 · 选择表情包' : `⏳ ${who} 的回合`;
+            } else if (data.status === 'finished') {
+                turnEl.textContent = '🏁 游戏已结束';
+            }
+            const p1Tag = $('player1Tag');
+            const p2Tag = $('player2Tag');
+            p1Tag.classList.toggle('active-turn', data.currentTurn === 'player1' && data.status === 'playing');
+            p2Tag.classList.toggle('active-turn', data.currentTurn === 'player2' && data.status === 'playing');
+            if (G.isAI) {
+                if (!p2Tag.querySelector('.ai-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'ai-badge';
+                    badge.textContent = '🤖 AI';
+                    p2Tag.appendChild(badge);
+                }
+            } else {
+                const badge = p2Tag.querySelector('.ai-badge');
+                if (badge) badge.remove();
+            }
+        }
+
+        function renderPoisonHint() {
+            const hint = $('poisonHint');
+            const data = G.data;
+            if (!data) { hint.style.display = 'none'; return; }
+            if (data.status === 'choosing') {
+                const myReady = isMyPoisonReady();
+                if (myReady) {
+                    hint.innerHTML = '✅ 你已确认毒药，等待对手选择...';
+                    hint.style.display = 'block';
+                    hint.style.background = 'rgba(111,207,151,0.06)';
+                    hint.style.borderColor = 'rgba(111,207,151,0.15)';
+                    hint.style.color = '#aaddbb';
+                } else {
+                    hint.innerHTML = '☠️ 点击一个表情包，选为你的 <strong>毒药</strong>（只有你可见），然后点击「确认毒药」';
+                    hint.style.display = 'block';
+                    hint.style.background = 'rgba(200,40,80,0.06)';
+                    hint.style.borderColor = 'rgba(200,40,80,0.15)';
+                    hint.style.color = '#cc99bb';
+                }
+            } else if (data.status === 'playing') {
+                const myTurn = isMyTurn();
+                if (myTurn) {
+                    hint.innerHTML = '🎯 选择一个表情包，小心别碰到毒药！';
+                } else {
+                    hint.innerHTML = '⏳ 等待对手选择...';
+                }
+                hint.style.display = 'block';
+                hint.style.background = 'rgba(160,100,255,0.06)';
+                hint.style.borderColor = 'rgba(160,100,255,0.1)';
+                hint.style.color = '#bbaaee';
+            } else if (data.status === 'finished') {
+                hint.style.display = 'none';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        function renderConfirmButton() {
+            const btn = $('btnConfirmPoison');
+            const data = G.data;
+            if (!data) { btn.style.display = 'none'; return; }
+            if (data.status === 'choosing' && !isMyPoisonReady() && G.myPoison !== null) {
+                btn.style.display = 'inline-flex';
+                btn.textContent = '☠️ 确认毒药';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function renderLeaveButton() {
+            const btn = $('btnLeaveGame');
+            const data = G.data;
+            if (!data) { btn.style.display = 'none'; return; }
+            if (data.status === 'playing' || data.status === 'choosing' || data.status === 'waiting') {
+                btn.style.display = 'inline-flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function renderStatusBar() {
+            const data = G.data;
+            if (!data) { setStatus('🌙 欢迎来到女巫的毒药游戏'); return; }
+            const p1 = data.player1;
+            const p2 = data.player2;
+            switch (data.status) {
+                case 'waiting':
+                    setStatus(`🕯️ 等待对手加入 · 游戏码 <strong>${G.gameId}</strong> · ${p1.name || '玩家1'} 已就绪`);
+                    break;
+                case 'choosing':
+                    const p1ready = p1.ready ? '✅' : '⏳';
+                    const p2ready = p2.ready ? '✅' : '⏳';
+                    setStatus(`🧪 选择毒药阶段 &nbsp; ${p1.name} ${p1ready} &nbsp;|&nbsp; ${p2.name} ${p2ready}`);
+                    break;
+                case 'playing':
+                    const who = data.currentTurn === 'player1' ? (p1.name || '玩家1') : (p2.name || '玩家2');
+                    setStatus(`✨ 当前回合：<strong>${who}</strong> · 已选 ${data.selected.length}/${G.emojis.length}`);
+                    break;
+                case 'finished':
+                    const winner = data.winner === 'player1' ? (p1.name || '玩家1') : (p2.name || '玩家2');
+                    setStatus(`🏁 游戏结束 · <strong>${winner}</strong> 获胜！`);
+                    break;
+                default:
+                    setStatus('🌙 女巫的毒药');
+            }
+        }
+
+        function renderGameCodeBadge() {
+            const badge = $('gameCodeBadge');
+            if (G.gameId && !G.isAI && !G.isLocal && G.mode === 'online-private') {
+                badge.style.display = 'flex';
+                $('gameCodeDisplay').textContent = G.gameId;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ================================================================
+        //  事件处理 (通用)
+        // ================================================================
+        async function onEmojiClick(e) {
+            const card = e.currentTarget;
+            const idx = parseInt(card.dataset.index);
+            const data = G.data;
+            if (!data || G.busy) return;
+            G.busy = true;
+            try {
+                if (data.status === 'choosing') {
+                    await handleChoosePoison(idx);
+                } else if (data.status === 'playing' && isMyTurn()) {
+                    await handlePlaySelect(idx);
+                }
+            } catch (err) {
+                console.error(err);
+                toast('操作失败：' + err.message);
+            } finally {
+                G.busy = false;
+            }
+        }
+
+        async function handleChoosePoison(idx) {
+            if (isMyPoisonReady()) { toast('你已确认毒药，不能更改'); return; }
+            G.myPoison = idx;
+            renderAll();
+            toast('已选择毒药，点击「确认毒药」提交');
+        }
+
+        async function handlePlaySelect(idx) {
+            const data = G.data;
+            if (!data || data.status !== 'playing' || !isMyTurn()) return;
+            if (data.selected.includes(idx)) { toast('这个表情包已经被选过了'); return; }
+            const oppPoison = getOpponentPoisonIndex();
+            const myPoison = getMyPoisonIndex();
+            if (idx === oppPoison || (myPoison !== null && idx === myPoison)) {
+                const loser = G.myPlayerId;
+                const winner = getOpponentId();
+                const newData = await apiUpdateGame(G.gameId, {
+                    selected: [...data.selected, idx],
+                    currentTurn: null,
+                    status: 'finished',
+                    winner,
+                    loser,
+                    turnCount: data.turnCount + 1,
+                });
+                G.data = newData;
+                await syncGame();
+                toast('💀 你触碰了毒药！');
+                return;
+            }
+            const nextTurn = getOpponentId();
+            const newData = await apiUpdateGame(G.gameId, {
+                selected: [...data.selected, idx],
+                currentTurn: nextTurn,
+                turnCount: data.turnCount + 1,
+            });
+            G.data = newData;
+            await syncGame();
+            toast('✅ 安全，轮到对手了');
+        }
+
+        async function onConfirmPoison() {
+            if (G.isLocal) { confirmLocalPoison(); return; }
+            if (G.busy) return;
+            G.busy = true;
+            try {
+                const data = G.data;
+                if (!data || data.status !== 'choosing') { toast('当前不是选择毒药阶段'); return; }
+                if (isMyPoisonReady()) { toast('你已经确认过毒药了'); return; }
+                if (G.myPoison === null) { toast('请先选择一个表情包作为毒药'); return; }
+                const update = {};
+                update[G.myPlayerId] = { ...data[G.myPlayerId], poison: G.myPoison, ready: true };
+                let newData = await apiUpdateGame(G.gameId, update);
+
+                if (G.isAI) {
+                    const aiPlayerId = getOpponentId();
+                    if (!newData[aiPlayerId].ready) {
+                        const aiPoison = aiChoosePoison();
+                        if (aiPoison === null) { G.busy = false; return; }
+                        const aiUpdate = {};
+                        aiUpdate[aiPlayerId] = { ...newData[aiPlayerId], poison: aiPoison, ready: true };
+                        newData = await apiUpdateGame(G.gameId, aiUpdate);
+                    }
+                }
+
+                if (newData.player1.ready && newData.player2.ready) {
+                    const firstTurn = Math.random() < 0.5 ? 'player1' : 'player2';
+                    newData = await apiUpdateGame(G.gameId, { status: 'playing', currentTurn: firstTurn });
+                } else {
+                    newData = await apiUpdateGame(G.gameId, {});
+                }
+
+                G.data = newData;
+                G.myPoison = null;
+                await syncGame();
+                toast('☠️ 毒药已确认！');
+
+                // AI 开始游戏时说话（快速）
+                if (G.isAI && newData.status === 'playing') {
+                    const startText = randomSaying('start');
+                    aiSpeak(startText, 'excited');
+                    if (newData.currentTurn === getOpponentId()) {
+                        setTimeout(() => executeAITurn(), 600);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                toast('确认失败：' + err.message);
+            } finally {
+                G.busy = false;
+            }
+        }
+
+        // ================================================================
+        //  同步 & 轮询
+        // ================================================================
+        async function syncGame() {
+            if (!G.gameId || G.isLocal) return;
+            try {
+                const data = await apiGetGame(G.gameId);
+                if (!data) {
+                    toast('游戏数据丢失，请重新创建');
+                    stopPolling();
+                    showScreen('screenHome');
+                    return;
+                }
+                G.data = data;
+                G.emojis = data.emojis || [];
+                G.emojiCount = data.emojiCount || 9;
+                if (data.status === 'finished') {
+                    stopPolling();
+                    // 游戏结束但保留聊天，让双方继续对话
+                    showResultScreen();
+                    return;
+                }
+                renderAll();
+                if (G.isAI && data.status === 'playing' && data.currentTurn === getOpponentId() && !G.aiExecuting) {
+                    setTimeout(() => executeAITurn(), 400);
+                }
+                if (!G.pollingTimer && G.gameId && !G.isAI) {
+                    startPolling();
+                }
+            } catch (err) {
+                console.error('同步失败', err);
+                toast('同步失败，请检查网络');
+            }
+        }
+
+        function startPolling() {
+            if (G.pollingTimer || G.isAI || G.isLocal) return;
+            G.pollingTimer = setInterval(async () => {
+                if (!G.gameId) return;
+                try {
+                    const data = await apiGetGame(G.gameId);
+                    if (!data) return;
+                    const oldVersion = G.data ? G.data.version : 0;
+                    if (data.version !== oldVersion) {
+                        G.data = data;
+                        G.emojis = data.emojis || [];
+                        renderAll();
+                        if (data.status === 'finished') {
+                            stopPolling();
+                            showResultScreen();
+                        }
+                        if (data.status === 'playing' && oldVersion > 0 && oldVersion < data.version) {
+                            toast('🔮 游戏状态更新！');
+                        }
+                    }
+                } catch (e) {}
+            }, G.pollingInterval);
+        }
+
+        function stopPolling() {
+            if (G.pollingTimer) {
+                clearInterval(G.pollingTimer);
+                G.pollingTimer = null;
+            }
+        }
+
+        // ================================================================
+        //  结果页面
+        // ================================================================
+        function showResultScreen() {
+            let data = G.data;
+            if (G.isLocal) data = G.localData;
+            if (!data) return;
+            showScreen('screenResult');
+
+            const p1 = data.player1;
+            const p2 = data.player2;
+            const winner = data.winner === 'player1' ? p1 : p2;
+            const loser = data.winner === 'player1' ? p2 : p1;
+            const isWinner = data.winner === G.myPlayerId;
+
+            $('resultIcon').textContent = isWinner ? '🏆' : '💀';
+            $('resultTitle').textContent = isWinner ? '🎉 你赢了！' : '😵 你输了...';
+            $('resultSub').textContent = `${winner.name} 的毒药让 ${loser.name} 中招了！`;
+
+            const p1Emoji = G.emojis[p1.poison] || '❓';
+            const p2Emoji = G.emojis[p2.poison] || '❓';
+            $('revealP1Emoji').textContent = p1Emoji;
+            $('revealP1Name').textContent = (p1.name || '玩家1') + ' 的毒药';
+            $('revealP2Emoji').textContent = p2Emoji;
+            $('revealP2Name').textContent = (p2.name || '玩家2') + ' 的毒药';
+
+            $('gameCodeBadge').style.display = 'none';
+            stopPolling();
+            stopGameChatPolling();
+            if (G.aiThinkTimer) { clearTimeout(G.aiThinkTimer); G.aiThinkTimer = null; }
+
+            // 新增：显示结果页聊天面板
+            const rcp = $('resultChatPanel');
+            if (rcp) {
+                rcp.style.display = 'block';
+                renderResultChat();
+            }
+
+            // AI 结果语音 + 赛后聊天（快速版）
+            if (G.isAI) {
+                const isAIWin = data.winner === 'player2';
+                const resultText = isAIWin ? randomSaying('win') : randomSaying('lose');
+                aiSpeak(resultText, isAIWin ? 'excited' : 'sad');
+                // 赛后挑衅/客套话，缩短延迟
+                const chatArr = isAIWin ? (AI_SAYINGS.chatWin || []) : (AI_SAYINGS.chatLose || []);
+                if (chatArr.length > 0) {
+                    const chatText = chatArr[Math.floor(Math.random() * chatArr.length)];
+                    setTimeout(() => {
+                        addGameChatMsg('AI女巫', chatText, false);
+                        renderResultChat();
+                        if (Voice && Voice.isEnabled()) Voice.speak(chatText, { emotion: 'excited' });
+                    }, 800);
+                }
+            }
+        }
+
+        // ================================================================
+        //  页面导航 & 按钮事件
+        // ================================================================
+        $('btnCreateGame').addEventListener('click', () => {
+            showScreen('screenCreate');
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.mode-option[data-mode="online-public"]').classList.add('selected');
+        });
+        $('btnJoinGame').addEventListener('click', () => { showScreen('screenJoin'); });
+        $('btnHall').addEventListener('click', () => { showScreen('screenHall'); refreshHall(); });
+        $('btnLocalGame').addEventListener('click', () => {
+            showScreen('screenCreate');
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.mode-option[data-mode="local"]').classList.add('selected');
+        });
+        $('btnAIGame').addEventListener('click', () => {
+            showScreen('screenCreate');
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.mode-option[data-mode="ai"]').classList.add('selected');
+        });
+
+        $('btnBackHomeFromCreate').addEventListener('click', () => { showScreen('screenHome'); });
+        $('btnConfirmCreate').addEventListener('click', onCreateGame);
+
+        $('btnBackHomeFromJoin').addEventListener('click', () => { showScreen('screenHome'); });
+        $('btnConfirmJoin').addEventListener('click', onJoinGame);
+
+        $('btnBackHomeFromHall').addEventListener('click', () => { stopHallAutoRefresh(); showScreen('screenHome'); });
+        $('btnRefreshHall').addEventListener('click', refreshHall);
+        $('autoRefreshHall').addEventListener('change', function() {
+            if (this.checked) startHallAutoRefresh();
+            else stopHallAutoRefresh();
+        });
+
+        $('btnCancelWaiting').addEventListener('click', async () => {
+            stopPolling();
+            if (G.gameId) { try { await apiDeleteGame(G.gameId); } catch (e) {} G.gameId = null; }
+            G.data = null;
+            G.myPlayerId = null;
+            G.isAI = false;
+            G.isLocal = false;
+            if (G._localTimeout) { clearTimeout(G._localTimeout); G._localTimeout = null; }
+            showScreen('screenHome');
+        });
+
+        $('btnConfirmPoison').addEventListener('click', onConfirmPoison);
+
+        $('btnLeaveGame').addEventListener('click', async () => {
+            if (confirm('确定要离开游戏吗？')) {
+                stopPolling();
+                stopGameChatPolling();
+                if (G.aiThinkTimer) { clearTimeout(G.aiThinkTimer); G.aiThinkTimer = null; }
+                if (G._localTimeout) { clearTimeout(G._localTimeout); G._localTimeout = null; }
+                // 关闭语音聊天
+                if (voiceChatConnected) stopVoiceChat();
+                // 清理游戏聊天记录
+                const key = getGameChatKey();
+                if (key) { try { localStorage.removeItem(key); } catch(e) {} }
+                if (G.gameId) { try { await apiDeleteGame(G.gameId); } catch (e) {} G.gameId = null; }
+                G.data = null;
+                G.myPlayerId = null;
+                G.isAI = false;
+                G.isLocal = false;
+                G.localData = null;
+                // 重置语音按钮
+                const vcb = $('voiceChatBtn');
+                if (vcb) {
+                    vcb.classList.remove('recording');
+                    vcb.classList.add('disabled');
+                    vcb.querySelector('.vc-icon').textContent = '🎤';
+                    vcb.querySelector('.vc-label').textContent = '语音聊天';
+                }
+                const gcp = $('gameChatPanel');
+                if (gcp) gcp.style.display = 'none';
+                showScreen('screenHome');
+            }
+        });
+
+        $('btnPlayAgain').addEventListener('click', () => {
+            resetGameState();
+            showScreen('screenCreate');
+        });
+        $('btnBackHomeFromResult').addEventListener('click', () => {
+            resetGameState();
+            showScreen('screenHome');
+        });
+
+        $('copyCodeBtn').addEventListener('click', () => {
+            const code = G.gameId;
+            if (code) {
+                navigator.clipboard.writeText(code).then(() => { toast('📋 游戏码已复制'); }).catch(() => { toast('复制失败，请手动复制'); });
+            }
+        });
+
+        $('btnHandoffReady').addEventListener('click', handleLocalHandoffReady);
+
+        // 语音开关按钮
+        $('voiceToggle').addEventListener('click', function() {
+            const newState = !Voice.isEnabled();
+            Voice.setEnabled(newState);
+            this.classList.toggle('disabled', !newState);
+            this.querySelector('.voice-icon').textContent = newState ? '🔊' : '🔇';
+            this.querySelector('.voice-label').textContent = newState ? 'AI语音' : '已静音';
+            if (newState) {
+                Voice.speak('语音已开启，我是你的AI女巫对手', { emotion: 'excited' });
+            }
+        });
+
+        document.querySelectorAll('.mode-option').forEach(el => {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('.mode-option').forEach(e => e.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // ================================================================
+        //  创建游戏
+        // ================================================================
+        async function onCreateGame() {
+            const name = G.myName || $('createName').value.trim() || '魔女A';
+            const count = parseInt($('createCount').value) || 9;
+            const selectedMode = document.querySelector('.mode-option.selected');
+            if (!selectedMode) { toast('请选择游戏模式'); return; }
+            const mode = selectedMode.dataset.mode;
+
+            if (count < 9 || count > 14) { toast('表情包数量请设置在 9 ~ 14 之间'); return; }
+
+            if (mode === 'local') {
+                const p2Name = prompt('请输入玩家2的昵称：', '魔女B') || '魔女B';
+                startLocalGame(name, p2Name, count);
+                return;
+            }
+
+            if (mode === 'ai') {
+                G.mode = 'ai';
+                G.isAI = true;
+                G.isLocal = false;
+                try {
+                    const { code, gameData } = await apiCreateGame({ name, emojiCount: count, isPublic: false });
+                    G.gameId = code;
+                    G.myPlayerId = 'player1';
+                    G.myName = name;
+                    G.data = gameData;
+                    G.emojis = gameData.emojis;
+                    G.emojiCount = count;
+                    G.myPoison = null;
+
+                    const aiName = 'AI女巫';
+                    const newData = await apiUpdateGame(code, {
+                        player2: { name: aiName, poison: null, ready: false },
+                        status: 'choosing',
+                    });
+                    G.data = newData;
+                    G.emojis = newData.emojis;
+                    showScreen('screenGame');
+                    renderAll();
+                    toast('🔮 AI 模式已启动！请选择毒药');
+
+                    // AI 欢迎语（快速）
+                    aiSpeak('我感受到了一股强大的魔法气息，来吧！', 'excited');
+                } catch (err) {
+                    console.error(err);
+                    toast('创建失败：' + err.message);
+                }
+                return;
+            }
+
+            const isPublic = mode === 'online-public';
+            try {
+                const { code, gameData } = await apiCreateGame({ name, emojiCount: count, isPublic });
+                G.gameId = code;
+                G.myPlayerId = 'player1';
+                G.myName = name;
+                G.data = gameData;
+                G.emojis = gameData.emojis;
+                G.emojiCount = count;
+                G.myPoison = null;
+                G.isAI = false;
+                G.isLocal = false;
+                G.mode = mode;
+
+                if (isPublic) {
+                    showScreen('screenWaiting');
+                    $('waitingInfo').innerHTML = `🏠 公共房间已创建，等待对手从大厅加入...`;
+                    renderGameCodeBadge();
+                } else {
+                    showScreen('screenWaiting');
+                    $('waitingInfo').innerHTML = `游戏码 <strong style="font-size:24px;letter-spacing:4px;color:#dcc0ff;">${code}</strong><br />分享给对手，等待加入...`;
+                    renderGameCodeBadge();
+                }
+                startPolling();
+                await waitForPlayer2();
+            } catch (err) {
+                console.error(err);
+                toast('创建失败：' + err.message);
+            }
+        }
+
+        async function waitForPlayer2() {
+            const checkInterval = setInterval(async () => {
+                if (!G.gameId) { clearInterval(checkInterval); return; }
+                try {
+                    const data = await apiGetGame(G.gameId);
+                    if (!data) { clearInterval(checkInterval); return; }
+                    G.data = data;
+                    if (data.player2 && data.player2.name) {
+                        clearInterval(checkInterval);
+                        const newData = await apiUpdateGame(G.gameId, { status: 'choosing' });
+                        G.data = newData;
+                        G.emojis = newData.emojis;
+                        showScreen('screenGame');
+                        renderAll();
+                        toast('🔮 对手已加入！请选择毒药');
+                        startPolling();
+                    }
+                } catch (e) {}
+            }, 1000);
+        }
+
+        // ================================================================
+        //  加入游戏（输入码）
+        // ================================================================
+        async function onJoinGame() {
+            const name = G.myName || $('joinName').value.trim() || '魔女B';
+            const code = $('joinCode').value.trim().toUpperCase();
+            if (!code || code.length < 4) { toast('请输入有效的游戏码'); return; }
+
+            try {
+                const data = await apiGetGame(code);
+                if (!data) { toast('游戏不存在，请检查游戏码'); return; }
+                if (data.status !== 'waiting') { toast('游戏已开始或已结束，无法加入'); return; }
+                if (data.player2 && data.player2.name) { toast('房间已满'); return; }
+
+                const newData = await apiUpdateGame(code, { player2: { name, poison: null, ready: false } });
+                G.gameId = code;
+                G.myPlayerId = 'player2';
+                G.myName = name;
+                G.data = newData;
+                G.emojis = newData.emojis;
+                G.emojiCount = newData.emojiCount || 9;
+                G.myPoison = null;
+                G.isAI = false;
+                G.isLocal = false;
+                G.mode = data.public ? 'online-public' : 'online-private';
+
+                showScreen('screenGame');
+                renderAll();
+                toast('🔮 已加入游戏！请选择毒药');
+                const updated = await apiUpdateGame(code, { status: 'choosing' });
+                G.data = updated;
+                G.emojis = updated.emojis;
+                renderAll();
+                startPolling();
+            } catch (err) {
+                console.error(err);
+                toast('加入失败：' + err.message);
+            }
+        }
+
+        // ================================================================
+        //  公共大厅
+        // ================================================================
+        let hallAutoRefreshTimer = null;
+
+        function startHallAutoRefresh() {
+            if (hallAutoRefreshTimer) return;
+            hallAutoRefreshTimer = setInterval(refreshHall, 30000);
+        }
+
+        function stopHallAutoRefresh() {
+            if (hallAutoRefreshTimer) { clearInterval(hallAutoRefreshTimer); hallAutoRefreshTimer = null; }
+        }
+
+        async function refreshHall() {
+            const listEl = $('roomList');
+            listEl.innerHTML = '<div class="empty-hall"><div class="icon">🔄</div><div class="text">加载中...</div></div>';
+            try {
+                const games = await apiListGames();
+                const available = games.filter(g => g.public === true && (g.status === 'waiting' || g.status === 'choosing'));
+                if (available.length === 0) {
+                    listEl.innerHTML = '<div class="empty-hall"><div class="icon">🏚️</div><div class="text">暂无可用房间，创建一个吧</div></div>';
+                    return;
+                }
+                let html = '';
+                available.forEach(g => {
+                    const p1 = g.player1;
+                    const p2 = g.player2;
+                    const players = (p2 && p2.name) ? '2/2' : '1/2';
+                    const statusText = g.status === 'waiting' ? '等待中' : '选择毒药';
+                    const canJoin = g.status === 'waiting' && (!p2 || !p2.name);
+                    html += `
+                        <div class="room-card">
+                            <div class="room-info">
+                                <span class="host">${p1.name || '玩家'}</span>
+                                <span class="status-badge">${statusText}</span>
+                                <span class="players">👥 ${players}</span>
+                            </div>
+                            <div class="room-actions">
+                                ${canJoin ? `<button class="btn btn-primary btn-small" onclick="joinHallRoom('${g.code}')">🔮 加入</button>` : `<button class="btn btn-small" disabled>已满</button>`}
+                            </div>
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<div class="empty-hall"><div class="icon">⚠️</div><div class="text">加载失败，请重试</div></div>';
+            }
+        }
+
+        async function joinHallRoom(code) {
+            const name = G.myName || ('玩家_' + Math.random().toString(36).slice(2, 6));
+            if (!name) return;
+            try {
+                const data = await apiGetGame(code);
+                if (!data) { toast('房间已不存在'); refreshHall(); return; }
+                if (data.status !== 'waiting') { toast('房间已开始或已结束'); refreshHall(); return; }
+                if (data.player2 && data.player2.name) { toast('房间已满'); refreshHall(); return; }
+
+                const newData = await apiUpdateGame(code, { player2: { name: name.trim(), poison: null, ready: false } });
+                G.gameId = code;
+                G.myPlayerId = 'player2';
+                G.myName = name.trim();
+                G.data = newData;
+                G.emojis = newData.emojis;
+                G.emojiCount = newData.emojiCount || 9;
+                G.myPoison = null;
+                G.isAI = false;
+                G.isLocal = false;
+                G.mode = 'online-public';
+
+                stopHallAutoRefresh();
+                showScreen('screenGame');
+                renderAll();
+                toast('🔮 已加入公共房间！请选择毒药');
+                const updated = await apiUpdateGame(code, { status: 'choosing' });
+                G.data = updated;
+                G.emojis = updated.emojis;
+                renderAll();
+                startPolling();
+            } catch (err) {
+                console.error(err);
+                toast('加入失败：' + err.message);
+            }
+        }
+        window.joinHallRoom = joinHallRoom;
+
+        // ================================================================
+        //  💬 公共聊天室系统（新增）
+        // ================================================================
+        const CHAT_COLLECTION = 'witch_chat_messages';
+        const CHAT_USERS_COLLECTION = 'witch_chat_users';
+        let chatRoomPollingTimer = null;
+        let chatRoomNickname = '';
+        let chatRoomLastCount = 0;
+
+        function getChatUsers() {
+            try {
+                const raw = localStorage.getItem('witch_chat_online_users');
+                if (!raw) return {};
+                return JSON.parse(raw);
+            } catch(e) { return {}; }
+        }
+
+        function setChatUsers(users) {
+            try {
+                localStorage.setItem('witch_chat_online_users', JSON.stringify(users));
+            } catch(e) {}
+        }
+
+        function updateMyOnlineStatus() {
+            const users = getChatUsers();
+            users[chatRoomNickname] = { lastSeen: Date.now(), name: chatRoomNickname };
+            // 清理超过60秒没心跳的用户
+            const now = Date.now();
+            Object.keys(users).forEach(k => {
+                if (now - users[k].lastSeen > 60000) delete users[k];
+            });
+            setChatUsers(users);
+        }
+
+        function getOnlineCount() {
+            const users = getChatUsers();
+            const now = Date.now();
+            return Object.values(users).filter(u => now - u.lastSeen < 60000).length;
+        }
+
+        function addChatMessage(msg) {
+            try {
+                let msgs = [];
+                const raw = localStorage.getItem('witch_chat_all_messages');
+                if (raw) msgs = JSON.parse(raw);
+                msgs.push(msg);
+                // 只保留最近200条
+                if (msgs.length > 200) msgs = msgs.slice(-200);
+                // 如果单条消息超过 700KB（含图片），清掉最早的图片消息
+                const totalSize = JSON.stringify(msgs).length;
+                if (totalSize > 4 * 1024 * 1024) { // 4MB 总上限
+                    msgs = msgs.filter(m => !m.image);
+                    if (msgs.length > 200) msgs = msgs.slice(-200);
+                }
+                localStorage.setItem('witch_chat_all_messages', JSON.stringify(msgs));
+            } catch(e) {
+                // localStorage 满了，清掉图片消息再试
+                try {
+                    let msgs = JSON.parse(localStorage.getItem('witch_chat_all_messages') || '[]');
+                    msgs = msgs.filter(m => !m.image);
+                    msgs.push(msg);
+                    if (msgs.length > 100) msgs = msgs.slice(-100);
+                    localStorage.setItem('witch_chat_all_messages', JSON.stringify(msgs));
+                } catch(e2) {}
+            }
+        }
+
+        function getChatMessages() {
+            try {
+                const raw = localStorage.getItem('witch_chat_all_messages');
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) { return []; }
+        }
+
+        function renderChatRoom() {
+            const container = $('chatRoomMessages');
+            const msgs = getChatMessages();
+            const myName = chatRoomNickname;
+            let html = '';
+            msgs.forEach((m, idx) => {
+                const isMe = m.name === myName;
+                let cls = 'guest';
+                if (m.system) cls = 'system';
+                else if (isMe) cls = 'host';
+                else if (m.name === 'AI女巫') cls = 'host';
+                let text = escapeHtml(m.text);
+                // 约战链接
+                if (m.challenge && m.gameCode) {
+                    text += ` <span class="challenge-link" onclick="joinChallengeRoom('${m.gameCode}')">[🔮 接受约战，加入 ${m.gameCode}]</span>`;
+                }
+                // 图片消息
+                let imgHtml = '';
+                if (m.image) {
+                    imgHtml = `<div class="msg-image-wrap">
+                        <img class="msg-image" src="${m.image}" alt="${escapeHtml(m.imageName || 'image')}" onclick="showImageOverlay('${m.image}')" title="点击查看大图" />
+                    </div>`;
+                }
+                html += `<div class="chatroom-msg">
+                    <span class="msg-name ${cls}">${escapeHtml(m.name)}:</span>
+                    <span class="msg-text">${text}</span>
+                    ${imgHtml}
+                </div>`;
+            });
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+            $('chatRoomOnline').textContent = getOnlineCount();
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  📷 图片上传相关函数（新增）
+        // ============================================================
+        const MAX_IMAGE_SIZE = 500 * 1024; // 压缩后最大 500KB
+        const MAX_DIMENSION = 800; // 最大边长 800px
+
+        // 压缩图片：缩小尺寸 + 降低 JPEG 质量
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        // 等比缩放
+                        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                            if (width > height) {
+                                height = Math.round(height * MAX_DIMENSION / width);
+                                width = MAX_DIMENSION;
+                            } else {
+                                width = Math.round(width * MAX_DIMENSION / height);
+                                height = MAX_DIMENSION;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // 尝试不同质量，确保 < 500KB
+                        let quality = 0.85;
+                        let result = canvas.toDataURL('image/jpeg', quality);
+                        while (result.length > MAX_IMAGE_SIZE * 1.37 && quality > 0.3) {
+                            quality -= 0.1;
+                            result = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        resolve({
+                            dataUrl: result,
+                            width,
+                            height,
+                            size: Math.round(result.length / 1.37), // 近似字节数
+                            name: file.name || 'image.png'
+                        });
+                    };
+                    img.onerror = () => reject(new Error('图片加载失败'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 格式化文件大小显示
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // 当前待发送的图片数据
+        let pendingImage = null;
+
+        // 处理选中的图片文件
+        async function handleImageSelect(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                toast('请选择图片文件！');
+                return;
+            }
+            try {
+                toast('📷 正在压缩图片...');
+                const compressed = await compressImage(file);
+                pendingImage = compressed;
+                // 显示预览
+                $('chatPreviewImg').src = compressed.dataUrl;
+                $('chatPreviewName').textContent = compressed.name;
+                $('chatPreviewSize').textContent = formatFileSize(compressed.size);
+                $('chatImagePreview').classList.add('active');
+                toast('✅ 图片已就绪，点击发送');
+            } catch (err) {
+                console.error('图片处理失败:', err);
+                toast('图片处理失败：' + err.message);
+            }
+        }
+
+        // 发送图片到聊天室
+        function sendChatImage() {
+            if (!pendingImage) return;
+            const msg = {
+                name: chatRoomNickname,
+                text: '',
+                system: false,
+                challenge: false,
+                gameCode: '',
+                image: pendingImage.dataUrl,
+                imageName: pendingImage.name,
+                time: Date.now()
+            };
+            addChatMessage(msg);
+            renderChatRoom();
+            // 清理预览
+            pendingImage = null;
+            $('chatImagePreview').classList.remove('active');
+            $('chatPreviewImg').src = '';
+            toast('📷 图片已发送！');
+        }
+
+        // 取消图片选择
+        function cancelImageSelect() {
+            pendingImage = null;
+            $('chatImagePreview').classList.remove('active');
+            $('chatPreviewImg').src = '';
+            $('chatImageInput').value = '';
+        }
+
+        // 全屏预览图片
+        function showImageOverlay(src) {
+            $('overlayImg').src = src;
+            $('imageOverlay').classList.add('active');
+        }
+
+        function hideImageOverlay() {
+            $('imageOverlay').classList.remove('active');
+            $('overlayImg').src = '';
+        }
+
+        // 修改 addChatMessage 以支持图片
+        const _origAddChatMessage = addChatMessage;
+        // 不需要重写，直接在消息结构中加 image 字段即可
+
+
+        function sendChatRoomMessage(text, isSystem, challenge) {
+            const msg = {
+                name: isSystem ? '系统' : chatRoomNickname,
+                text: text,
+                system: !!isSystem,
+                challenge: !!challenge,
+                gameCode: challenge || '',
+                time: Date.now()
+            };
+            addChatMessage(msg);
+            renderChatRoom();
+        }
+
+        function startChatRoomPolling() {
+            if (chatRoomPollingTimer) return;
+            // 心跳
+            updateMyOnlineStatus();
+            const heartbeat = setInterval(updateMyOnlineStatus, 15000);
+            chatRoomPollingTimer = setInterval(() => {
+                renderChatRoom();
+                updateMyOnlineStatus();
+            }, 3000);
+            // 存一个引用方便清理
+            chatRoomPollingTimer._heartbeat = heartbeat;
+        }
+
+        function stopChatRoomPolling() {
+            if (chatRoomPollingTimer) {
+                clearInterval(chatRoomPollingTimer);
+                if (chatRoomPollingTimer._heartbeat) clearInterval(chatRoomPollingTimer._heartbeat);
+                chatRoomPollingTimer = null;
+            }
+            // 把自己从在线列表移除
+            const users = getChatUsers();
+            delete users[chatRoomNickname];
+            setChatUsers(users);
+        }
+
+        // 约战：创建一个游戏并发送约战消息
+        async function sendChallenge() {
+            if (!chatRoomNickname) return;
+            try {
+                const count = 9;
+                const { code, gameData } = await apiCreateGame({ name: chatRoomNickname, emojiCount: count, isPublic: false });
+                sendChatRoomMessage(`我发起了约战！房间号 ${code}，来战！`, false, code);
+                toast(`🔮 约战已发送！房间号：${code}`);
+            } catch(err) {
+                toast('约战失败：' + err.message);
+            }
+        }
+
+        // 接受约战：用给定code加入
+        async function joinChallengeRoom(code) {
+            const name = chatRoomNickname || '挑战者';
+            try {
+                const data = await apiGetGame(code);
+                if (!data) { toast('房间已不存在'); return; }
+                if (data.status !== 'waiting') { toast('该局已开始或已结束'); return; }
+                if (data.player2 && data.player2.name) { toast('房间已满'); return; }
+                const newData = await apiUpdateGame(code, { player2: { name, poison: null, ready: false } });
+                G.gameId = code;
+                G.myPlayerId = 'player2';
+                G.myName = name;
+                G.data = newData;
+                G.emojis = newData.emojis;
+                G.emojiCount = newData.emojiCount || 9;
+                G.myPoison = null;
+                G.isAI = false;
+                G.isLocal = false;
+                G.mode = 'online-private';
+                stopChatRoomPolling();
+                showScreen('screenGame');
+                renderAll();
+                toast('🔮 已加入约战房间！请选择毒药');
+                const updated = await apiUpdateGame(code, { status: 'choosing' });
+                G.data = updated;
+                renderAll();
+                startPolling();
+            } catch(err) {
+                toast('加入失败：' + err.message);
+            }
+        }
+        window.joinChallengeRoom = joinChallengeRoom;
+
+        // ================================================================
+        //  💬 游戏内打字聊天（新增）
+        // ================================================================
+        const GAME_CHAT_COLLECTION = 'witch_game_chats';
+        let gameChatPollingTimer = null;
+
+        function getGameChatKey() {
+            return G.gameId ? `witch_game_chat_${G.gameId}` : null;
+        }
+
+        function addGameChatMsg(name, text, system) {
+            const key = getGameChatKey();
+            if (!key) return;
+            try {
+                let msgs = JSON.parse(localStorage.getItem(key) || '[]');
+                msgs.push({ name, text, system: !!system, time: Date.now() });
+                if (msgs.length > 50) msgs = msgs.slice(-50);
+                localStorage.setItem(key, JSON.stringify(msgs));
+            } catch(e) {}
+        }
+
+        function getGameChatMsgs() {
+            const key = getGameChatKey();
+            if (!key) return [];
+            try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
+        }
+
+        function renderGameChat() {
+            const container = $('gameChatMessages');
+            const msgs = getGameChatMsgs();
+            const myName = G.myName;
+            let html = '';
+            msgs.forEach(m => {
+                let cls = m.system ? 'system' : (m.name === myName ? 'me' : 'opponent');
+                html += `<div class="chat-msg">
+                    <span class="chat-name ${cls}">${escapeHtml(m.name)}:</span>
+                    <span class="chat-text">${escapeHtml(m.text)}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+            const status = $('gameChatStatus');
+            if (status) status.textContent = G.isAI ? 'AI 也在听哦' : '实时聊天中';
+        }
+
+        function sendGameChat(text) {
+            if (!text.trim() || !G.gameId) return;
+            addGameChatMsg(G.myName || '我', text.trim(), false);
+            renderGameChat();
+            // AI 自动回复（简单关键词触发）
+            if (G.isAI) {
+                setTimeout(() => aiChatReply(text.trim()), 800 + Math.random() * 600);
+            }
+        }
+
+        function aiChatReply(playerText) {
+            const replies = [
+                '哼，嘴上说说可赢不了我',
+                '你这话是在虚张声势吧',
+                '我可不会被你干扰到',
+                '说得好听，手底下见真章',
+                '你确定吗？那我可就不客气了',
+                '别废话了，专心选吧',
+                '哈哈，有意思',
+                '你这是心理战术？太嫩了',
+            ];
+            // 关键词触发特殊回复
+            if (playerText.includes('垃圾') || playerText.includes('菜')) {
+                replies.push('你说谁菜呢？等下让你见识一下');
+            }
+            if (playerText.includes('加油') || playerText.includes('GG')) {
+                replies.push('客气什么，认真打就对了');
+            }
+            if (playerText.includes('帅') || playerText.includes('漂亮')) {
+                replies.push('那是当然，我可是顶级女巫');
+            }
+            const reply = replies[Math.floor(Math.random() * replies.length)];
+            addGameChatMsg('AI女巫', reply, false);
+            renderGameChat();
+            // AI 也用语音说出来
+            if (Voice && Voice.isEnabled()) {
+                Voice.speak(reply, { emotion: 'excited' });
+            }
+        }
+
+        function startGameChatPolling() {
+            if (gameChatPollingTimer) return;
+            renderGameChat();
+            gameChatPollingTimer = setInterval(renderGameChat, 2000);
+        }
+
+        function stopGameChatPolling() {
+            if (gameChatPollingTimer) {
+                clearInterval(gameChatPollingTimer);
+                gameChatPollingTimer = null;
+            }
+        }
+
+        // ================================================================
+        //  🎤 语音聊天（WebRTC）—— 单向开麦即可通话
+        //  设计：只要一方开麦，另一方就能听到（无需双方都开）
+        //  原理：开麦方作为 caller 主动拨号并发送音频流；
+        //        对方即使没开麦也会收到 call 事件，answer 后建立连接
+        //        （对方只是没有麦克风流可发回来，但能听到）
+        // ================================================================
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let voiceChatConnected = false;
+        let peerId = '';
+        let remotePeerId = '';
+        let voiceWaitInterval = null;
+        let voiceHeartbeatInterval = null;
+
+        // 用 localStorage 做信令通道（同浏览器/同设备两个标签页可互通）
+        function getVoicePeers() {
+            try { return JSON.parse(localStorage.getItem('witch_voice_' + G.gameId) || '{}'); }
+            catch(e) { return {}; }
+        }
+        function setVoicePeer(playerId, id) {
+            const key = 'witch_voice_' + G.gameId;
+            const peers = getVoicePeers();
+            peers[playerId] = { id, ts: Date.now() };
+            localStorage.setItem(key, JSON.stringify(peers));
+        }
+        function clearMyVoicePeer() {
+            const key = 'witch_voice_' + G.gameId;
+            const peers = getVoicePeers();
+            delete peers[G.myPlayerId];
+            localStorage.setItem(key, JSON.stringify(peers));
+        }
+        // 通知对方"我正在通话中，快接听"
+        function broadcastCallSignal() {
+            const key = 'witch_call_signal_' + G.gameId;
+            const sig = JSON.parse(localStorage.getItem(key) || '{}');
+            sig[G.myPlayerId] = { callerId: peerId, ts: Date.now() };
+            localStorage.setItem(key, JSON.stringify(sig));
+        }
+        function checkCallSignal() {
+            const key = 'witch_call_signal_' + G.gameId;
+            try {
+                const sig = JSON.parse(localStorage.getItem(key) || '{}');
+                const oppId = G.myPlayerId === 'player1' ? 'player2' : 'player1';
+                return sig[oppId] || null;
+            } catch(e) { return null; }
+        }
+        function clearCallSignal() {
+            localStorage.removeItem('witch_call_signal_' + G.gameId);
+        }
+
+        async function initVoiceChat() {
+            const btn = $('voiceChatBtn');
+            if (!G.gameId) { toast('请先进入游戏再开语音'); return; }
+
+            // 如果已连接 → 关闭
+            if (voiceChatConnected || peerConnection) {
+                stopVoiceChat();
+                btn.classList.remove('recording');
+                btn.querySelector('.vc-icon').textContent = '🎤';
+                btn.querySelector('.vc-label').textContent = '语音聊天';
+                toast('🎤 语音聊天已关闭');
+                return;
+            }
+
+            try {
+                btn.querySelector('.vc-label').textContent = '连接中...';
+                // 获取麦克风（即使对方没开麦，我开麦就能让他听到我）
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                toast('🎤 麦克风已开启，正在呼叫对方...');
+
+                await loadPeerJs();
+                const Peer = window.Peer;
+                peerId = 'witch_' + G.gameId + '_' + G.myPlayerId + '_' + Date.now();
+                peerConnection = new Peer(peerId, { debug: 0 });
+
+                peerConnection.on('open', (id) => {
+                    // 注册自己
+                    setVoicePeer(G.myPlayerId, id);
+                    // 广播呼叫信号
+                    broadcastCallSignal();
+                    // 尝试连接对方
+                    tryConnectVoice();
+                });
+
+                // 关键：对方打来电话时，即使我没主动call，也要answer
+                // 这样对方开麦 → 我自动接听 → 我能听到对方
+                peerConnection.on('call', (call) => {
+                    // 如果我有麦克风就附带发送，没有就只接收
+                    if (localStream) {
+                        call.answer(localStream);
+                    } else {
+                        call.answer(); // 只接收
+                    }
+                    call.on('stream', (stream) => {
+                        attachRemoteStream(stream);
+                    });
+                    call.on('error', (e) => console.warn('Call error:', e));
+                });
+
+                peerConnection.on('error', (err) => {
+                    console.warn('Peer error:', err.type);
+                    if (err.type === 'peer-unavailable') {
+                        // 对方可能还没上线，继续轮询
+                        setTimeout(tryConnectVoice, 3000);
+                    }
+                });
+
+                // 持续尝试连接对方 + 监听呼叫信号
+                voiceWaitInterval = setInterval(() => {
+                    if (voiceChatConnected) { clearInterval(voiceWaitInterval); return; }
+                    tryConnectVoice();
+                    // 检查对方是否正在呼叫我
+                    const sig = checkCallSignal();
+                    if (sig && sig.callerId && sig.callerId !== peerId) {
+                        // 对方在呼叫，主动拨回去建立双向
+                        if (!remotePeerId) {
+                            remotePeerId = sig.callerId;
+                            const call = peerConnection.call(sig.callerId, localStream);
+                            call.on('stream', (stream) => attachRemoteStream(stream));
+                        }
+                    }
+                }, 3000);
+
+                // 心跳：持续广播自己在通话中
+                voiceHeartbeatInterval = setInterval(() => {
+                    if (peerConnection && peerConnection.id) {
+                        setVoicePeer(G.myPlayerId, peerConnection.id);
+                        broadcastCallSignal();
+                    }
+                }, 5000);
+
+                // 3秒后如果还没连上，至少显示"已开麦"状态
+                setTimeout(() => {
+                    if (!voiceChatConnected) {
+                        btn.classList.add('recording');
+                        btn.querySelector('.vc-icon').textContent = '🔴';
+                        btn.querySelector('.vc-label').textContent = '等待对方接入';
+                        toast('📢 已开麦！等待对方接入...');
+                    }
+                }, 3000);
+
+            } catch (err) {
+                console.error('语音初始化失败:', err);
+                if (err.name === 'NotAllowedError') {
+                    toast('🎤 麦克风权限被拒绝，请在浏览器设置中允许');
+                } else {
+                    toast('语音聊天暂不可用：' + err.message);
+                }
+                btn.querySelector('.vc-label').textContent = '语音聊天';
+                btn.classList.remove('recording');
+                // 清理
+                if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+            }
+        }
+
+        function tryConnectVoice() {
+            if (!peerConnection) return;
+            const key = 'witch_voice_' + G.gameId;
+            try {
+                const peers = getVoicePeers();
+                const oppId = G.myPlayerId === 'player1' ? 'player2' : 'player1';
+                const oppInfo = peers[oppId];
+                if (oppInfo && oppInfo.id && oppInfo.id !== peerId) {
+                    remotePeerId = oppInfo.id;
+                    const call = peerConnection.call(oppInfo.id, localStream);
+                    call.on('stream', (stream) => {
+                        attachRemoteStream(stream);
+                    });
+                    call.on('error', (e) => console.warn('Call error:', e));
+                }
+            } catch(e) {}
+        }
+
+        function attachRemoteStream(stream) {
+            if (voiceChatConnected) return;
+            voiceChatConnected = true;
+            remoteStream = stream;
+            let audioEl = document.getElementById('remoteAudio');
+            if (!audioEl) {
+                audioEl = document.createElement('audio');
+                audioEl.id = 'remoteAudio';
+                audioEl.autoplay = true;
+                // 重要：不要静音，让对方声音能播出来
+                audioEl.muted = false;
+                audioEl.volume = 1.0;
+                document.body.appendChild(audioEl);
+            }
+            audioEl.srcObject = stream;
+            audioEl.play().catch(e => console.warn('Audio play failed:', e));
+            toast('🔴 语音通话已连接！对方能听到你了');
+            const btn = $('voiceChatBtn');
+            btn.querySelector('.vc-icon').textContent = '🔴';
+            btn.querySelector('.vc-label').textContent = '通话中';
+            // 停止等待
+            if (voiceWaitInterval) { clearInterval(voiceWaitInterval); voiceWaitInterval = null; }
+        }
+
+        function stopVoiceChat() {
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            if (peerConnection) {
+                try { peerConnection.destroy(); } catch(e) {}
+                peerConnection = null;
+            }
+            voiceChatConnected = false;
+            if (voiceWaitInterval) { clearInterval(voiceWaitInterval); voiceWaitInterval = null; }
+            if (voiceHeartbeatInterval) { clearInterval(voiceHeartbeatInterval); voiceHeartbeatInterval = null; }
+            clearMyVoicePeer();
+            clearCallSignal();
+            // 停止远程音频
+            const audioEl = document.getElementById('remoteAudio');
+            if (audioEl) { audioEl.pause(); audioEl.srcObject = null; }
+        }
+
+        function loadPeerJs() {
+            return new Promise((resolve, reject) => {
+                if (window.Peer) { resolve(); return; }
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js';
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('无法加载语音库，请检查网络'));
+                document.head.appendChild(script);
+            });
+        }
+
+        // ================================================================
+        //  结果页聊天（新增 - 游戏结束后双方继续对话）
+        // ================================================================
+        function renderResultChat() {
+            const container = $('resultChatMessages');
+            if (!container) return;
+            const msgs = getGameChatMsgs();
+            const myName = G.myName;
+            let html = '';
+            // 只显示最后10条
+            const recent = msgs.slice(-10);
+            recent.forEach(m => {
+                if (m.system) return;
+                let cls = m.name === myName ? 'me' : 'opponent';
+                html += `<div class="chat-msg">
+                    <span class="chat-name ${cls}">${escapeHtml(m.name)}:</span>
+                    <span class="chat-text">${escapeHtml(m.text)}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendResultChat(text) {
+            if (!text.trim()) return;
+            addGameChatMsg(G.myName || '我', text.trim(), false);
+            renderResultChat();
+            if (G.isAI) {
+                setTimeout(() => {
+                    const chatWin = AI_SAYINGS.chatWin || ['服不服？'];
+                    const chatLose = AI_SAYINGS.chatLose || ['下次我一定赢'];
+                    const arr = G.data && G.data.winner === 'player2' ? chatWin : chatLose;
+                    const reply = arr[Math.floor(Math.random() * arr.length)];
+                    addGameChatMsg('AI女巫', reply, false);
+                    renderResultChat();
+                    if (Voice && Voice.isEnabled()) Voice.speak(reply, { emotion: 'excited' });
+                }, 300);
+            }
+        }
+
+        // ================================================================
+        //  🏆 排行榜系统（新增）
+        //  —— 胜利榜 / 失败榜 / 胜率榜
+        //  —— 数据持久化到 localStorage
+        // ================================================================
+        const LEADERBOARD_KEY = 'witch_leaderboard_v1';
+
+        // 获取所有玩家统计 { name: { wins, losses, lastPlay: ts } }
+        function getLeaderboard() {
+            try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || {}; }
+            catch(e) { return {}; }
+        }
+        function saveLeaderboard(data) {
+            try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data)); }
+            catch(e) {}
+        }
+        // 记录一局结果（带去重：同一局只记一次）
+        // 用 gameId + winner 组合做唯一标识，防止重复记录
+        function recordGameResult(winnerName, loserName, gameId) {
+            const lb = getLeaderboard();
+            // 去重：检查这局是否已经记录过
+            const recordKey = '__recorded_' + gameId;
+            if (lb[recordKey]) return; // 已经记录过了，跳过
+            lb[recordKey] = Date.now(); // 标记这局已记录
+            if (!lb[winnerName]) lb[winnerName] = { wins: 0, losses: 0, lastPlay: 0 };
+            if (!lb[loserName]) lb[loserName] = { wins: 0, losses: 0, lastPlay: 0 };
+            lb[winnerName].wins++;
+            lb[winnerName].lastPlay = Date.now();
+            lb[loserName].losses++;
+            lb[loserName].lastPlay = Date.now();
+            saveLeaderboard(lb);
+        }
+        // 获取排序后的列表
+        function getSortedPlayers(sortBy) {
+            const lb = getLeaderboard();
+            const arr = Object.entries(lb).map(([name, s]) => ({
+                name,
+                wins: s.wins || 0,
+                losses: s.losses || 0,
+                total: (s.wins || 0) + (s.losses || 0),
+                rate: ((s.wins || 0) / Math.max((s.wins || 0) + (s.losses || 0), 1)) * 100,
+            }));
+            if (sortBy === 'win') arr.sort((a, b) => b.wins - a.wins || b.rate - a.rate);
+            else if (sortBy === 'lose') arr.sort((a, b) => b.losses - a.losses || a.rate - b.rate);
+            else if (sortBy === 'rate') arr.sort((a, b) => b.rate - a.rate || b.wins - a.wins);
+            return arr;
+        }
+
+        const rankAvatars = ['🧙‍♀️','🧛','🧟','🧞','🦊','🦄','🐉','🦅','🦉','🦇'];
+        function rankAvatar(idx) { return rankAvatars[idx % rankAvatars.length]; }
+        function rankClass(idx) {
+            if (idx === 0) return 'rank-1';
+            if (idx === 1) return 'rank-2';
+            if (idx === 2) return 'rank-3';
+            return 'rank-other';
+        }
+
+        function renderLeaderboard(tab) {
+            const winList = $('list-win');
+            const loseList = $('list-lose');
+            const rateList = $('list-rate');
+            const summary = $('leaderboardSummary');
+
+            const winArr = getSortedPlayers('win');
+            const loseArr = getSortedPlayers('lose');
+            const rateArr = getSortedPlayers('rate').filter(p => p.total >= 3); // 至少3局才有胜率排名
+
+            // 汇总
+            const lb = getLeaderboard();
+            const allPlayers = Object.keys(lb);
+            const totalGames = allPlayers.reduce((s, n) => s + (lb[n].wins||0) + (lb[n].losses||0), 0) / 2;
+            const totalWins = allPlayers.reduce((s, n) => s + (lb[n].wins||0), 0);
+            summary.innerHTML = `
+                <div class="leaderboard-summary-item">
+                    <div class="label">👥 玩家数</div>
+                    <div class="value total">${allPlayers.length}</div>
+                </div>
+                <div class="leaderboard-summary-item">
+                    <div class="label">🎮 总局数</div>
+                    <div class="value total">${totalGames}</div>
+                </div>
+                <div class="leaderboard-summary-item">
+                    <div class="label">🏆 总胜利</div>
+                    <div class="value win">${totalWins}</div>
+                </div>
+            `;
+
+            function buildHTML(arr, type) {
+                if (arr.length === 0) {
+                    return `<div class="leaderboard-empty">
+                        <div class="icon">🏜️</div>
+                        <div class="text">暂无数据，去打几局吧！</div>
+                    </div>`;
+                }
+                return arr.slice(0, 20).map((p, i) => {
+                    const cls = rankClass(i);
+                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}`;
+                    let scoreHTML = '';
+                    if (type === 'win') {
+                        scoreHTML = `<div class="player-score score-win">🏆 ${p.wins}胜</div>`;
+                    } else if (type === 'lose') {
+                        scoreHTML = `<div class="player-score score-lose">💀 ${p.losses}负</div>`;
+                    } else {
+                        scoreHTML = `<div class="player-score ${p.rate >= 50 ? 'score-win' : 'score-lose'}">⚡ ${p.rate.toFixed(0)}%</div>`;
+                    }
+                    return `
+                    <div class="leaderboard-item">
+                        <div class="rank ${cls}">${medal}</div>
+                        <div class="player-avatar">${rankAvatar(i)}</div>
+                        <div class="player-info">
+                            <div class="player-name">${escapeHtml(p.name)}</div>
+                            <div class="player-stats">${p.wins}胜 ${p.losses}负 · 共${p.total}局</div>
+                        </div>
+                        ${scoreHTML}
+                    </div>`;
+                }).join('');
+            }
+
+            winList.innerHTML = buildHTML(winArr, 'win');
+            loseList.innerHTML = buildHTML(loseArr, 'lose');
+            rateList.innerHTML = buildHTML(rateArr, 'rate');
+
+            // 切换tab
+            document.querySelectorAll('.leaderboard-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            $('panel-win').classList.toggle('active', tab === 'win');
+            $('panel-lose').classList.toggle('active', tab === 'lose');
+            $('panel-rate').classList.toggle('active', tab === 'rate');
+        }
+
+        // 游戏结束时记录到排行榜（钩子方式，不覆盖原函数）
+        let _resultRecorded = false;
+        function tryRecordLeaderboard() {
+            if (_resultRecorded) return;
+            let data = G.data;
+            if (G.isLocal) data = G.localData;
+            if (!data) return;
+            const winner = data.winner === 'player1' ? data.player1 : data.player2;
+            const loser = data.winner === 'player1' ? data.player2 : data.player1;
+            if (winner && loser && winner.name && loser.name
+                && winner.name !== 'AI女巫' && loser.name !== 'AI女巫') {
+                // 传入 gameId 用于去重，防止同一局被记录多次
+                const gid = G.gameId || (G.localData ? 'local_' + (data.turnCount||0) + '_' + (winner.name||'') + '_' + (loser.name||'') : 'unknown');
+                recordGameResult(winner.name, loser.name, gid);
+                _resultRecorded = true;
+            }
+        }
+        // 在 showResultScreen 末尾调用（直接修改原函数末尾）
+        // 用 Monkey-patch：保存原函数引用，包装后放回
+        const _origShowResultScreen = showResultScreen;
+        showResultScreen = function() {
+            _origShowResultScreen.apply(this, arguments);
+            tryRecordLeaderboard();
+        };
+        // 在 resetGameState 中重置 flag
+        const _origResetGameState = resetGameState;
+        resetGameState = function() {
+            _resultRecorded = false;
+            _origResetGameState.apply(this, arguments);
+        };
+
+        // ================================================================
+        //  重置（修改：清理新增模块的状态）
+        // ================================================================
+        function resetGameState() {
+            stopPolling();
+            stopGameChatPolling();
+            if (G.aiThinkTimer) { clearTimeout(G.aiThinkTimer); G.aiThinkTimer = null; }
+            if (G._localTimeout) { clearTimeout(G._localTimeout); G._localTimeout = null; }
+            G.myPlayerId = null;
+            G.myName = '';
+            G.gameId = null;
+            G.emojiCount = 9;
+            G.emojis = [];
+            G.data = null;
+            G.myPoison = null;
+            G.confirmed = false;
+            G.busy = false;
+            G.isAI = false;
+            G.isLocal = false;
+            G.localData = null;
+            G.localPhase = null;
+            G.localTurn = null;
+            G.aiExecuting = false;
+            G.mode = 'online-public';
+            $('handoffOverlay').style.display = 'none';
+            // 停止语音合成
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            // 关闭语音聊天
+            if (voiceChatConnected) stopVoiceChat();
+            const vcBtn = $('voiceChatBtn');
+            if (vcBtn) {
+                vcBtn.classList.remove('recording');
+                vcBtn.classList.add('disabled');
+                vcBtn.querySelector('.vc-icon').textContent = '🎤';
+                vcBtn.querySelector('.vc-label').textContent = '语音聊天';
+            }
+            // 隐藏聊天面板
+            const gcp = $('gameChatPanel');
+            if (gcp) gcp.style.display = 'none';
+            const rcp = $('resultChatPanel');
+            if (rcp) rcp.style.display = 'none';
+            // 清理游戏聊天数据
+            // (保留localStorage中的历史，下次进游戏再清)
+        }
+
+        // ================================================================
+        //  初始化
+        // ================================================================
+        // ================================================================
+        // 检查是否已登录，未登录提示并跳转
+
+        // ================================================================
+        //  初始化
+        // ================================================================
+        function init() {
+            $('createCount').value = 9;
+
+            // 初始化语音系统
+            Voice.init();
+
+            // 检查浏览器是否支持语音
+            if (!window.speechSynthesis) {
+                $('voiceToggle').style.display = 'none';
+                console.warn('当前浏览器不支持语音合成 API');
+            }
+
+            // 检查是否支持语音聊天
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                const vcb = $('voiceChatBtn');
+                if (vcb) vcb.style.display = 'none';
+                console.warn('当前浏览器不支持 WebRTC 语音');
+            }
+
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.mode-option[data-mode="online-public"]').classList.add('selected');
+
+            // ---- 首页按钮（需登录）----
+            $('btnCreateGame').addEventListener('click', () => {
+                showScreen('screenCreate');
+                document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+                document.querySelector('.mode-option[data-mode="online-public"]').classList.add('selected');
+            });
+            $('btnJoinGame').addEventListener('click', () => {
+                showScreen('screenJoin');
+            });
+            $('btnHall').addEventListener('click', () => {
+                showScreen('screenHall'); refreshHall();
+            });
+            $('btnLocalGame').addEventListener('click', () => {
+                showScreen('screenCreate');
+                document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+                document.querySelector('.mode-option[data-mode="local"]').classList.add('selected');
+            });
+            $('btnAIGame').addEventListener('click', () => {
+                showScreen('screenCreate');
+                document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+                document.querySelector('.mode-option[data-mode="ai"]').classList.add('selected');
+            });
+
+            // ---- 公共聊天室 ----
+            $('btnChatRoom').addEventListener('click', () => {
+                chatRoomNickname = G.myName || ('玩家_' + Math.random().toString(36).slice(2, 6));
+                G.myName = chatRoomNickname;
+                showScreen('screenChatRoom');
+                renderChatRoom();
+                startChatRoomPolling();
+                sendChatRoomMessage(`${chatRoomNickname} 进入了聊天室`, true);
+            });
+
+            $('btnBackHomeFromChat').addEventListener('click', () => {
+                stopChatRoomPolling();
+                showScreen('screenHome');
+            });
+
+            $('btnChatRoomSend').addEventListener('click', () => {
+                const input = $('chatRoomInput');
+                const text = input.value.trim();
+                if (!text) return;
+                sendChatRoomMessage(text);
+                input.value = '';
+            });
+
+            $('chatRoomInput').addEventListener('keydown', (e) => {
+                // 🔧 IME 修复
+                if (e.isComposing || e.keyCode === 229) return;
+                if (e.key === 'Enter') $('btnChatRoomSend').click();
+            });
+
+            // ---- 图片上传 ----
+            $('btnUploadImage').addEventListener('click', () => {
+                $('chatImageInput').click();
+            });
+
+            $('chatImageInput').addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) handleImageSelect(file);
+            });
+
+            $('btnCancelImage').addEventListener('click', cancelImageSelect);
+
+            $('btnSendImage').addEventListener('click', sendChatImage);
+
+            $('overlayClose').addEventListener('click', hideImageOverlay);
+
+            $('imageOverlay').addEventListener('click', (e) => {
+                if (e.target === $('imageOverlay')) hideImageOverlay();
+            });
+
+            // 粘贴图片支持
+            $('chatRoomInput').addEventListener('paste', (e) => {
+                const items = e.clipboardData && e.clipboardData.items;
+                if (!items) return;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        const file = items[i].getAsFile();
+                        if (file) handleImageSelect(file);
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            });
+
+            $('btnChallenge').addEventListener('click', sendChallenge);
+
+            // ---- 游戏内聊天 ----
+            $('gameChatSend').addEventListener('click', () => {
+                const input = $('gameChatInput');
+                const text = input.value.trim();
+                if (!text) return;
+                sendGameChat(text);
+                input.value = '';
+            });
+
+            $('gameChatInput').addEventListener('keydown', (e) => {
+                // 🔧 IME 修复
+                if (e.isComposing || e.keyCode === 229) return;
+                if (e.key === 'Enter') $('gameChatSend').click();
+            });
+
+            // ---- 结果页聊天 ----
+            $('resultChatSend').addEventListener('click', () => {
+                const input = $('resultChatInput');
+                const text = input.value.trim();
+                if (!text) return;
+                sendResultChat(text);
+                input.value = '';
+            });
+
+            $('resultChatInput').addEventListener('keydown', (e) => {
+                // 🔧 IME 修复
+                if (e.isComposing || e.keyCode === 229) return;
+                if (e.key === 'Enter') $('resultChatSend').click();
+            });
+
+            // ---- 语音聊天按钮 ----
+            $('voiceChatBtn').addEventListener('click', function() {
+                if (this.classList.contains('disabled')) {
+                    toast('请先进入游戏再开启语音聊天');
+                    return;
+                }
+                initVoiceChat();
+            });
+
+            // ---- 排行榜按钮（无需登录也可看）----
+            $('btnLeaderboard').addEventListener('click', () => {
+                showScreen('screenLeaderboard');
+                renderLeaderboard('win');
+            });
+            $('btnBackHomeFromLeaderboard').addEventListener('click', () => {
+                showScreen('screenHome');
+            });
+            document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    renderLeaderboard(this.dataset.tab);
+                });
+            });
+
+            // 确保有默认昵称
+            if (!G.myName) {
+                G.myName = '玩家_' + Math.random().toString(36).slice(2, 6);
+            }
+            // 自动填入昵称
+            if ($('createName') && !$('createName').value) {
+                $('createName').value = G.myName;
+            }
+            if ($('joinName') && !$('joinName').value) {
+                $('joinName').value = G.myName;
+            }
+            renderAll();
+        }
+
+        init();
+
+        document.addEventListener('keydown', (e) => {
+            // 🔧 IME 修复：输入法组合中（keyCode=229）不触发任何逻辑
+            if (e.isComposing || e.keyCode === 229) return;
+            if (e.key === 'Enter') {
+                const active = document.querySelector('.screen.active');
+                if (active) {
+                    const id = active.id;
+                    if (id === 'screenCreate') $('btnConfirmCreate').click();
+                    else if (id === 'screenJoin') $('btnConfirmJoin').click();
+                }
+            }
+        });
+
+        console.log('🧙‍♀️ 女巫的毒药联机版 v3.1');
+        console.log('📷 新增：公共聊天室图片上传功能');
+        console.log('✨ 新增功能：AI 语音交互');
+        console.log('🔊 右下角可开关 AI 语音');
+
+        // ================================================================
+        //  🎵 全局音乐播放器（右上角）
+        //  两首真歌（MP3 直链）
+        //  功能：播放/暂停、下拉选歌、双击切下一首
+        //  不可调音量、不可调大小
+        // ================================================================
+        (function() {
+            const audio = $('mpAudio');
+            const playBtn = $('mpPlayBtn');
+            const sel = $('mpTrackSelect');
+            const playerEl = $('musicPlayer');
+
+            // 3 首歌配置（MP3 直链）
+            const TRACKS = [
+                {
+                    name: '叹云兮',
+                    url: 'https://videotourl.com/audio/1775644865865-ca59ea90-c4f3-40ad-bc66-a7ef9b78fe2d.mp3'
+                },
+                {
+                    name: '坏女孩',
+                    url: 'https://videotourl.com/audio/1775047918657-8634c61f-d414-440b-b8d3-307a2b4a87bd.mp3'
+                },
+                {
+                    name: '背景',
+                    url: 'https://xbtzone.com/blog/wp-content/uploads/2019/09/title.mp3'
+                }
+            ];
+
+            let currentTrack = 0;
+            let isPlaying = false;
+
+            function updateUI(playing) {
+                if (playing) {
+                    playBtn.textContent = '⏸️';
+                    playerEl.classList.add('playing');
+                } else {
+                    playBtn.textContent = '▶️';
+                    playerEl.classList.remove('playing');
+                }
+            }
+
+            function loadTrack(idx) {
+                const track = TRACKS[idx];
+                if (!track) return;
+                audio.src = track.url;
+                audio.load();
+            }
+
+            function playTrack(idx) {
+                const track = TRACKS[idx];
+                if (!track) return;
+                // 如果切了歌，重新加载
+                if (audio.src !== track.url) {
+                    audio.src = track.url;
+                }
+                audio.play().then(() => {
+                    isPlaying = true;
+                    updateUI(true);
+                    toast('🎵 正在播放：' + track.name);
+                }).catch((err) => {
+                    console.warn('[Music] 播放失败:', track.name, err);
+                    toast('⚠️ ' + track.name + ' 播放失败，请检查链接');
+                    isPlaying = false;
+                    updateUI(false);
+                });
+            }
+
+            function togglePlay() {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    updateUI(false);
+                } else {
+                    if (!audio.src || audio.src === window.location.href) {
+                        loadTrack(currentTrack);
+                    }
+                    playTrack(currentTrack);
+                }
+            }
+
+            function switchTrack(idx) {
+                if (idx < 0 || idx >= TRACKS.length) return;
+                const wasPlaying = isPlaying;
+                audio.pause();
+                currentTrack = idx;
+                sel.value = String(idx);
+                loadTrack(idx);
+                if (wasPlaying) {
+                    playTrack(idx);
+                }
+            }
+
+            // MP3 播完 → 循环（重新播放同一首）
+            audio.addEventListener('ended', () => {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            });
+
+            // 下拉选歌
+            sel.addEventListener('change', () => {
+                const idx = parseInt(sel.value);
+                switchTrack(idx);
+            });
+
+            // 播放/暂停按钮
+            playBtn.addEventListener('click', togglePlay);
+
+            // 双击播放器 → 切下一首
+            playerEl.addEventListener('dblclick', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') return;
+                const next = (currentTrack + 1) % TRACKS.length;
+                switchTrack(next);
+                toast('🎵 ' + TRACKS[next].name);
+            });
+
+            // 初始化显示
+            sel.value = '0';
+            loadTrack(0);
+            updateUI(false);
+        })();
+
+        console.log('🎵 全局音乐播放器（叹云兮/坏女孩/背景）');
+    </script>
+</body>
+</html>
